@@ -1,5 +1,7 @@
 #include <iostream>
 #include <cassert>
+#include <vector>
+#include <string>
 #include "AbstractInterp4Command.hh"
 #include "Preprocessor.hh"
 #include "LibInterface.hh"
@@ -17,35 +19,51 @@ int main()
     cout << "=========================" << endl << endl;
   }
   
-  // Ładowanie biblioteki przez LibInterface
-  LibInterface libInterface;
+  // Lista wtyczek do załadowania
+  vector<string> libraries = {
+    "libs/libInterp4Move.so",
+    "libs/libInterp4Set.so",
+    "libs/libInterp4Rotate.so",
+    "libs/libInterp4Pause.so"
+  };
   
-  if (!libInterface.LoadLibrary("libInterp4Move.so")) {
-    cerr << "!!! Błąd: Nie udało się załadować libInterp4Move.so" << endl;
-    return 1;
+  // Przetwarzanie każdej wtyczki
+  for (const auto& libPath : libraries) {
+    cout << "========================================" << endl;
+    cout << "Ładowanie biblioteki: " << libPath << endl;
+    cout << "========================================" << endl;
+    
+    LibInterface libInterface;
+    
+    if (!libInterface.LoadLibrary(libPath)) {
+      cerr << "!!! Błąd: Nie udało się załadować " << libPath << endl;
+      cout << endl;
+      continue;
+    }
+    
+    // Tworzenie instancji komendy
+    AbstractInterp4Command *pCmd = libInterface.CreateCmd();
+    
+    if (!pCmd) {
+      cerr << "!!! Błąd: Nie udało się utworzyć komendy z " << libPath << endl;
+      cout << endl;
+      continue;
+    }
+    
+    // Wyświetlanie informacji o komendzie
+    cout << "Nazwa komendy: " << pCmd->GetCmdName() << endl;
+    cout << endl;
+    
+    cout << "Składnia:" << endl;
+    pCmd->PrintSyntax();
+    cout << endl;
+    
+    cout << "Przykładowe wywołanie:" << endl;
+    pCmd->PrintCmd();
+    cout << endl;
+    
+    delete pCmd;
   }
-  
-  // Tworzenie instancji komendy
-  AbstractInterp4Command *pCmd = libInterface.CreateCmd();
-  
-  if (!pCmd) {
-    cerr << "!!! Błąd: Nie udało się utworzyć komendy" << endl;
-    return 1;
-  }
-  
-  // Wyświetlanie informacji o komendzie
-  cout << "Nazwa komendy: " << pCmd->GetCmdName() << endl;
-  cout << endl;
-  
-  cout << "Składnia:" << endl;
-  pCmd->PrintSyntax();
-  cout << endl;
-  
-  cout << "Komenda:" << endl;
-  pCmd->PrintCmd();
-  cout << endl;
-  
-  delete pCmd;
   
   return 0;
 }
