@@ -22,12 +22,18 @@ LDFLAGS=-Wall
 
 
 
-interp: obj/main.o
-	g++ ${LDFLAGS} -o interp  obj/main.o -ldl
+interp: obj/main.o obj/Preprocessor.o obj/LibInterface.o
+	g++ ${LDFLAGS} -o interp obj/main.o obj/Preprocessor.o obj/LibInterface.o -ldl
 
 obj/main.o: src/main.cpp inc/AbstractInterp4Command.hh inc/AbstractScene.hh\
-            inc/AbstractComChannel.hh
+            inc/AbstractComChannel.hh inc/Preprocessor.hh inc/LibInterface.hh
 	g++ -c ${CPPFLAGS} -o obj/main.o src/main.cpp
+
+obj/Preprocessor.o: src/Preprocessor.cpp inc/Preprocessor.hh
+	g++ -c ${CPPFLAGS} -o obj/Preprocessor.o src/Preprocessor.cpp
+
+obj/LibInterface.o: src/LibInterface.cpp inc/LibInterface.hh inc/AbstractInterp4Command.hh
+	g++ -c ${CPPFLAGS} -o obj/LibInterface.o src/LibInterface.cpp
 
 doc:
 	cd dox; make
@@ -62,4 +68,3 @@ help:
 	@echo "  make           # kompilacja i uruchomienie programu."
 	@echo "  make clean     # usuwa produkty kompilacji."
 	@echo
- 
