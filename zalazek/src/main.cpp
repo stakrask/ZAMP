@@ -15,8 +15,7 @@ int main()
   
   if (!preprocessedOutput.empty()) {
     cout << "=== Wynik preprocesora ===" << endl;
-    cout << preprocessedOutput << endl;
-    cout << "=========================" << endl << endl;
+    cout << preprocessedOutput << endl << endl;
   }
   
   // Lista wtyczek do załadowania
@@ -29,9 +28,7 @@ int main()
   
   // Przetwarzanie każdej wtyczki
   for (const auto& libPath : libraries) {
-    cout << "========================================" << endl;
     cout << "Ładowanie biblioteki: " << libPath << endl;
-    cout << "========================================" << endl;
     
     LibInterface libInterface;
     
