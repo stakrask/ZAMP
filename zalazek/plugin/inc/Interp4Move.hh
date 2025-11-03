@@ -12,24 +12,25 @@
  * \file
  * \brief Definicja klasy Interp4Move
  *
- * Plik zawiera definicję klasy Interp4Move ...
+ * Plik zawiera definicję klasy Interp4Move
  */
 
 /*!
  * \brief Modeluje polecenie dla robota mobilnego, które wymusza jego ruch do przodu
  *
- *  Klasa modeluj47e ...
+ * Klasa modeluje polecenie Move, które powoduje ruch obiektu
+ * z określoną prędkością na określoną odległość
  */
 class Interp4Move: public AbstractInterp4Command {
   /*
-   *  Tu należy zdefiniować pola, które są niezbędne
-   *  do przechowywania wartości parametrów danego polecenia.
-   *  Ponieżej zdefiniowane jest tylko jedno pole jako przykład.
+   * Pola przechowujące wartości parametrów polecenia
    */
   double  _Speed_mmS;
+  double  _Distance_m;
+  
  public:
   /*!
-   * \brief
+   * \brief Konstruktor
    */
   Interp4Move();  
   /*!
@@ -43,7 +44,7 @@ class Interp4Move: public AbstractInterp4Command {
   /*!
    * \brief Wyświetla wartości wczytanych parametrów
    */
-  virtual void PrintParams() const override {} 
+  virtual void PrintParams() const override;
 
   /*!
    * \brief Wyświetla nazwę polecenia
@@ -70,9 +71,9 @@ class Interp4Move: public AbstractInterp4Command {
 
   
   /*!
-   * \brief
+   * \brief Tworzy nową instancję polecenia
    *
-   *  Ta metoda nie musi być zdefiniowna w klasie bazowej.
+   * Ta metoda nie musi być zdefiniowana w klasie bazowej.
    */
   static AbstractInterp4Command* CreateCmd();
  };

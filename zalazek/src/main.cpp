@@ -1,22 +1,18 @@
 #include <iostream>
-#include <cassert>
+#include <sstream>
 #include <vector>
 #include <string>
-#include "AbstractInterp4Command.hh"
 #include "Preprocessor.hh"
-#include "LibInterface.hh"
+#include "CommandRegistry.hh"
 
 using namespace std;
 
 int main()
 {
-  // Przetwarzanie pliku plik_test.cmd przez preprocesor
-  const string preprocessedOutput = RunPreprocessor("plik_test.cmd");
+  cout << "=== Interpreter poleceń - Etap 1 ===" << endl << endl;
   
-  if (!preprocessedOutput.empty()) {
-    cout << "=== Wynik preprocesora ===" << endl;
-    cout << preprocessedOutput << endl << endl;
-  }
+  // Tworzenie rejestru poleceń
+  CommandRegistry registry;
   
   // Lista wtyczek do załadowania
   vector<string> libraries = {
@@ -26,41 +22,40 @@ int main()
     "libs/libInterp4Pause.so"
   };
   
-  // Przetwarzanie każdej wtyczki
+  // Rejestracja wszystkich wtyczek
+  cout << "=== Rejestracja wtyczek ===" << endl;
   for (const auto& libPath : libraries) {
-    cout << "Ładowanie biblioteki: " << libPath << endl;
-    
-    LibInterface libInterface;
-    
-    if (!libInterface.LoadLibrary(libPath)) {
-      cerr << "!!! Błąd: Nie udało się załadować " << libPath << endl;
-      cout << endl;
-      continue;
+    if (!registry.RegisterCommand(libPath)) {
+      cerr << "!!! Ostrzeżenie: Problem z załadowaniem " << libPath << endl;
     }
-    
-    // Tworzenie instancji komendy
-    AbstractInterp4Command *pCmd = libInterface.CreateCmd();
-    
-    if (!pCmd) {
-      cerr << "!!! Błąd: Nie udało się utworzyć komendy z " << libPath << endl;
-      cout << endl;
-      continue;
-    }
-    
-    // Wyświetlanie informacji o komendzie
-    cout << "Nazwa komendy: " << pCmd->GetCmdName() << endl;
-    cout << endl;
-    
-    cout << "Składnia:" << endl;
-    pCmd->PrintSyntax();
-    cout << endl;
-    
-    cout << "Przykładowe wywołanie:" << endl;
-    pCmd->PrintCmd();
-    cout << endl;
-    
-    delete pCmd;
   }
+  cout << endl;
+  
+  // Wyświetlenie dostępnych poleceń
+  registry.PrintAvailableCommands();
+  
+  // Przetwarzanie pliku plik_test.cmd przez preprocesor
+  const string inputFile = "plik_test.cmd";
+  cout << "=== Przetwarzanie pliku: " << inputFile << " ===" << endl;
+  
+  const string preprocessedOutput = RunPreprocessor(inputFile.c_str());
+  
+  if (preprocessedOutput.empty()) {
+    cerr << "!!! Błąd: Nie udało się przetworzyć pliku przez preprocesor." << endl;
+    return 1;
+  }
+  
+  cout << "\n=== Zawartość po przetworzeniu przez preprocesor ===" << endl;
+  cout << preprocessedOutput << endl;
+  
+  // Przetwarzanie poleceń
+  istringstream cmdStream(preprocessedOutput);
+  
+  if (!registry.ProcessCommands(cmdStream)) {
+    cerr << "\n!!! Ostrzeżenie: Niektóre polecenia nie zostały poprawnie przetworzone." << endl;
+  }
+  
+  cout << "\n=== Program zakończony ===" << endl;
   
   return 0;
 }
