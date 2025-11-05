@@ -48,7 +48,7 @@ bool CommandRegistry::ProcessCommands(istream& rStrm) const {
     int lineNumber = 0;
     bool allSuccess = true;
     
-    cout << "\n=== Przetwarzanie poleceń ===" << endl;
+    cout << "\nPrzetwarzanie poleceń" << endl;
     
     while (getline(rStrm, line)) {
         lineNumber++;
@@ -108,14 +108,12 @@ bool CommandRegistry::ProcessCommands(istream& rStrm) const {
         
         delete pCmd;
     }
-    
-    cout << "\n=== Koniec przetwarzania ===" << endl;
-    
+      
     return allSuccess;
 }
 
 void CommandRegistry::PrintAvailableCommands() const {
-    cout << "\n=== Dostępne polecenia ===" << endl;
+    cout << "\nDostępne polecenia" << endl;
     
     if (_commandMap.empty()) {
         cout << "Brak zarejestrowanych poleceń." << endl;

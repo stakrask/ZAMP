@@ -1,61 +1,162 @@
 #include <iostream>
 #include <sstream>
-#include <vector>
-#include <string>
+#include <xercesc/sax2/SAX2XMLReader.hpp>
+#include <xercesc/sax2/XMLReaderFactory.hpp>
+#include <xercesc/sax2/DefaultHandler.hpp>
+#include <xercesc/util/XMLString.hpp>
+
 #include "Preprocessor.hh"
 #include "CommandRegistry.hh"
+#include "Configuration.hh"
+#include "xmlinterp.hh"
 
 using namespace std;
+using namespace xercesc;
 
-int main()
+/*!
+ * \brief Wczytuje konfigurację z pliku XML
+ * 
+ * Czyta z pliku opis konfiguracji sceny (wtyczki i obiekty).
+ * \param[in] sFileName - nazwa pliku z konfiguracją XML
+ * \param[out] rConfig - obiekt konfiguracji, do którego zapisywane są dane
+ * \retval true - jeśli wczytanie zostało zrealizowane poprawnie
+ * \retval false - w przypadku błędu
+ */
+bool ReadXMLConfiguration(const char* sFileName, Configuration &rConfig)
 {
-  cout << "=== Interpreter poleceń - Etap 1 ===" << endl << endl;
-  
-  // Tworzenie rejestru poleceń
-  CommandRegistry registry;
-  
-  // Lista wtyczek do załadowania
-  vector<string> libraries = {
-    "libs/libInterp4Move.so",
-    "libs/libInterp4Set.so",
-    "libs/libInterp4Rotate.so",
-    "libs/libInterp4Pause.so"
-  };
-  
-  // Rejestracja wszystkich wtyczek
-  cout << "=== Rejestracja wtyczek ===" << endl;
-  for (const auto& libPath : libraries) {
-    if (!registry.RegisterCommand(libPath)) {
-      cerr << "!!! Ostrzeżenie: Problem z załadowaniem " << libPath << endl;
+    try {
+        XMLPlatformUtils::Initialize();
     }
-  }
-  cout << endl;
-  
-  // Wyświetlenie dostępnych poleceń
-  registry.PrintAvailableCommands();
-  
-  // Przetwarzanie pliku plik_test.cmd przez preprocesor
-  const string inputFile = "plik_test.cmd";
-  cout << "=== Przetwarzanie pliku: " << inputFile << " ===" << endl;
-  
-  const string preprocessedOutput = RunPreprocessor(inputFile.c_str());
-  
-  if (preprocessedOutput.empty()) {
-    cerr << "!!! Błąd: Nie udało się przetworzyć pliku przez preprocesor." << endl;
-    return 1;
-  }
-  
-  cout << "\n=== Zawartość po przetworzeniu przez preprocesor ===" << endl;
-  cout << preprocessedOutput << endl;
-  
-  // Przetwarzanie poleceń
-  istringstream cmdStream(preprocessedOutput);
-  
-  if (!registry.ProcessCommands(cmdStream)) {
-    cerr << "\n!!! Ostrzeżenie: Niektóre polecenia nie zostały poprawnie przetworzone." << endl;
-  }
-  
-  cout << "\n=== Program zakończony ===" << endl;
-  
-  return 0;
+    catch (const XMLException& toCatch) {
+        char* message = XMLString::transcode(toCatch.getMessage());
+        cerr << "!!! Błąd podczas inicjalizacji parsera XML:" << endl;
+        cerr << "    " << message << endl;
+        XMLString::release(&message);
+        return false;
+    }
+
+    SAX2XMLReader* pParser = XMLReaderFactory::createXMLReader();
+
+    pParser->setFeature(XMLUni::fgSAX2CoreNameSpaces, true);
+    pParser->setFeature(XMLUni::fgSAX2CoreValidation, true);
+    pParser->setFeature(XMLUni::fgXercesDynamic, false);
+    pParser->setFeature(XMLUni::fgXercesSchema, true);
+    pParser->setFeature(XMLUni::fgXercesSchemaFullChecking, true);
+    pParser->setFeature(XMLUni::fgXercesValidationErrorAsFatal, true);
+
+    DefaultHandler* pHandler = new XMLInterp4Config(rConfig);
+    pParser->setContentHandler(pHandler);
+    pParser->setErrorHandler(pHandler);
+
+    try {
+        // Załaduj gramatykę (schema XSD)
+        if (!pParser->loadGrammar("config/config.xsd",
+                                  Grammar::SchemaGrammarType, true)) {
+            cerr << "!!! Błąd: Plik config/config.xsd nie może zostać wczytany." << endl;
+            delete pParser;
+            delete pHandler;
+            return false;
+        }
+        
+        pParser->setFeature(XMLUni::fgXercesUseCachedGrammarInParse, true);
+        
+        // Parsuj plik XML
+        pParser->parse(sFileName);
+    }
+    catch (const XMLException& Exception) {
+        char* sMessage = XMLString::transcode(Exception.getMessage());
+        cerr << "!!! Wyjątek XML:" << endl
+             << "    " << sMessage << endl;
+        XMLString::release(&sMessage);
+        delete pParser;
+        delete pHandler;
+        return false;
+    }
+    catch (const SAXParseException& Exception) {
+        char* sMessage = XMLString::transcode(Exception.getMessage());
+        char* sSystemId = XMLString::transcode(Exception.getSystemId());
+
+        cerr << "!!! Błąd parsowania XML!" << endl
+             << "    Plik:  " << sSystemId << endl
+             << "   Linia: " << Exception.getLineNumber() << endl
+             << " Kolumna: " << Exception.getColumnNumber() << endl
+             << " Informacja: " << sMessage << endl;
+
+        XMLString::release(&sMessage);
+        XMLString::release(&sSystemId);
+        delete pParser;
+        delete pHandler;
+        return false;
+    }
+    catch (...) {
+        cerr << "!!! Nieoczekiwany wyjątek podczas parsowania XML!" << endl;
+        delete pParser;
+        delete pHandler;
+        return false;
+    }
+
+    delete pParser;
+    delete pHandler;
+    
+    XMLPlatformUtils::Terminate();
+    
+    return true;
+}
+
+int main(int argc, char* argv[])
+{
+
+    Configuration config;
+    
+    const string configFile = "config/config.xml";
+    cout << "KONFIG Z XML" << endl;
+    cout << "Plik: " << configFile << endl << endl;
+    
+    if (!ReadXMLConfiguration(configFile.c_str(), config)) {
+        cerr << "\n!!! Błąd: Nie udało się wczytać konfiguracji z pliku XML." << endl;
+        return 1;
+    }
+    
+    cout << "\n Konfiguracja:" << endl;
+    config.PrintSummary();
+
+    CommandRegistry registry;
+    
+    cout << "WTYCZKI" << endl;
+    
+    for (const auto& libPath : config.GetLibraries()) {
+        // Dodaj prefix "libs/" jeśli nie ma pełnej ścieżki
+        string fullPath = libPath;
+        if (fullPath.find('/') == string::npos) {
+            fullPath = "libs/" + libPath;
+        }
+        
+        if (!registry.RegisterCommand(fullPath)) {
+            cerr << "!!! Ostrzeżenie: Problem z załadowaniem " << fullPath << endl;
+        }
+    }
+    
+    cout << endl;
+    registry.PrintAvailableCommands();
+
+    const string inputFile = "plik_test.cmd";
+    cout << "PLIK CMD" << inputFile << " ===" << endl;
+    
+    const string preprocessedOutput = RunPreprocessor(inputFile.c_str());
+    
+    if (preprocessedOutput.empty()) {
+        cerr << "!!! Błąd: Nie udało się przetworzyć pliku przez preprocesor." << endl;
+        return 1;
+    }
+    
+    cout << "PREPROCESOR" << endl;
+    cout << preprocessedOutput << endl;
+    
+    istringstream cmdStream(preprocessedOutput);
+    
+    if (!registry.ProcessCommands(cmdStream)) {
+        cerr << "\n!!! Ostrzeżenie: Niektóre polecenia nie zostały poprawnie przetworzone." << endl;
+    }
+
+    return 0;
 }

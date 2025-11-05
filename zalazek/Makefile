@@ -1,72 +1,121 @@
-__start__: obj __lines_for_space__ interp __plugin__
-	export LD_LIBRARY_PATH="./libs"; ./interp
 
-obj:
-	mkdir obj
+# Kompilator i flagi
+CXX = g++
+CXXFLAGS = -Wall -g -pedantic -std=c++17 -Iinc
+LDFLAGS = -Wall
+LIBS = -lxerces-c
 
+# Katalogi
+SRC_DIR = src
+OBJ_DIR = obj
+INC_DIR = inc
+PLUGIN_DIR = plugin
+LIBS_DIR = libs
 
-__lines_for_space__:
-	@echo
-	@echo
-	@echo
-	@echo
-	@echo
+# Pliki źródłowe
+SOURCES = $(SRC_DIR)/main.cpp \
+          $(SRC_DIR)/CommandRegistry.cpp \
+          $(SRC_DIR)/LibInterface.cpp \
+          $(SRC_DIR)/Preprocessor.cpp \
+          $(SRC_DIR)/Configuration.cpp \
+          $(SRC_DIR)/xmlinterp.cpp
 
+# Pliki obiektowe
+OBJECTS = $(patsubst $(SRC_DIR)/%.cpp,$(OBJ_DIR)/%.o,$(SOURCES))
 
-__plugin__:
-	cd plugin; make
+# Nazwa programu wykonywalnego
+TARGET = interpreter
 
-CPPFLAGS=-Wall -pedantic -std=c++17 -Iinc
-LDFLAGS=-Wall
+# Cel główny
+all: directories $(LIBS_DIR) plugins $(TARGET)
+	@echo ""
+	@echo "=========================================="
+	@echo " Kompilacja zakończona pomyślnie!"
+	@echo "=========================================="
+	@echo ""
+	@echo "Aby uruchomić program, wpisz: ./$(TARGET)"
+	@echo ""
 
+# Tworzenie katalogów
+directories:
+	@mkdir -p $(OBJ_DIR)
 
+$(LIBS_DIR):
+	@mkdir -p $(LIBS_DIR)
 
+# Kompilacja wtyczek
+plugins:
+	@echo ""
+	@echo "=== Kompilacja wtyczek ==="
+	@$(MAKE) -C $(PLUGIN_DIR)
+	@echo ""
 
-interp: obj/main.o obj/Preprocessor.o obj/LibInterface.o obj/CommandRegistry.o
-	g++ ${LDFLAGS} -o interp obj/main.o obj/Preprocessor.o obj/LibInterface.o obj/CommandRegistry.o -ldl
+# Linkowanie programu głównego
+$(TARGET): $(OBJECTS)
+	@echo ""
+	@echo "=== Linkowanie programu głównego ==="
+	$(CXX) $(LDFLAGS) -o $@ $^ $(LIBS)
+	@echo "Program $(TARGET) utworzony."
 
-obj/main.o: src/main.cpp inc/Preprocessor.hh inc/CommandRegistry.hh
-	g++ -c ${CPPFLAGS} -o obj/main.o src/main.cpp
+# Kompilacja plików źródłowych
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
+	@echo "Kompilacja: $<"
+	$(CXX) $(CXXFLAGS) -c $< -o $@
 
-obj/Preprocessor.o: src/Preprocessor.cpp inc/Preprocessor.hh
-	g++ -c ${CPPFLAGS} -o obj/Preprocessor.o src/Preprocessor.cpp
+# Zależności (można wygenerować automatycznie, ale tutaj ręcznie dla prostoty)
+$(OBJ_DIR)/main.o: $(SRC_DIR)/main.cpp $(INC_DIR)/Preprocessor.hh \
+                   $(INC_DIR)/CommandRegistry.hh $(INC_DIR)/Configuration.hh \
+                   $(INC_DIR)/xmlinterp.hh
 
-obj/LibInterface.o: src/LibInterface.cpp inc/LibInterface.hh inc/AbstractInterp4Command.hh
-	g++ -c ${CPPFLAGS} -o obj/LibInterface.o src/LibInterface.cpp
+$(OBJ_DIR)/CommandRegistry.o: $(SRC_DIR)/CommandRegistry.cpp \
+                               $(INC_DIR)/CommandRegistry.hh \
+                               $(INC_DIR)/LibInterface.hh
 
-obj/CommandRegistry.o: src/CommandRegistry.cpp inc/CommandRegistry.hh inc/LibInterface.hh inc/AbstractInterp4Command.hh
-	g++ -c ${CPPFLAGS} -o obj/CommandRegistry.o src/CommandRegistry.cpp
+$(OBJ_DIR)/LibInterface.o: $(SRC_DIR)/LibInterface.cpp \
+                           $(INC_DIR)/LibInterface.hh \
+                           $(INC_DIR)/AbstractInterp4Command.hh
 
-doc:
-	cd dox; make
+$(OBJ_DIR)/Preprocessor.o: $(SRC_DIR)/Preprocessor.cpp \
+                           $(INC_DIR)/Preprocessor.hh
 
+$(OBJ_DIR)/Configuration.o: $(SRC_DIR)/Configuration.cpp \
+                           $(INC_DIR)/Configuration.hh \
+                           $(INC_DIR)/Vector3D.hh
+
+$(OBJ_DIR)/xmlinterp.o: $(SRC_DIR)/xmlinterp.cpp \
+                       $(INC_DIR)/xmlinterp.hh \
+                       $(INC_DIR)/Configuration.hh
+
+# Czyszczenie
 clean:
-	rm -f obj/* interp core*
-
-
-clean_plugin:
-	cd plugin; make clean
+	@echo "Czyszczenie plików obiektowych..."
+	@rm -f $(OBJ_DIR)/*.o
+	@$(MAKE) -C $(PLUGIN_DIR) clean
 
 cleanall: clean
-	cd plugin; make cleanall
-	cd dox; make cleanall
-	rm -f libs/*
-	find . -name \*~ -print -exec rm {} \;
+	@echo "Usuwanie programu wykonywalnego i bibliotek..."
+	@rm -f $(TARGET)
+	@rm -f $(LIBS_DIR)/*.so
+	@$(MAKE) -C $(PLUGIN_DIR) cleanall
+	@find . -name '*~' -exec rm {} \;
+	@echo "Kompletne czyszczenie zakończone."
 
+# Uruchomienie programu
+run: all
+	@echo ""
+	@echo "=== Uruchomienie programu ==="
+	@./$(TARGET)
+
+# Pomoc
 help:
-	@echo
-	@echo "  Lista podcelow dla polecenia make"
-	@echo 
-	@echo "        - (wywolanie bez specyfikacji celu) wymusza"
-	@echo "          kompilacje i uruchomienie programu."
-	@echo "  clean    - usuwa produkty kompilacji oraz program"
-	@echo "  clean_plugin - usuwa plugin"
-	@echo "  cleanall - wykonuje wszystkie operacje dla podcelu clean oraz clean_plugin"
-	@echo "             oprocz tego usuwa wszystkie kopie (pliki, ktorych nazwa "
-	@echo "             konczy sie znakiem ~)."
-	@echo "  help  - wyswietla niniejszy komunikat"
-	@echo
-	@echo " Przykladowe wywolania dla poszczegolnych wariantow. "
-	@echo "  make           # kompilacja i uruchomienie programu."
-	@echo "  make clean     # usuwa produkty kompilacji."
-	@echo
+	@echo ""
+	@echo "Dostępne cele:"
+	@echo "  all       - kompilacja całego projektu (domyślne)"
+	@echo "  plugins   - kompilacja tylko wtyczek"
+	@echo "  clean     - usunięcie plików obiektowych"
+	@echo "  cleanall  - usunięcie wszystkich wygenerowanych plików"
+	@echo "  run       - kompilacja i uruchomienie programu"
+	@echo "  help      - wyświetlenie tej pomocy"
+	@echo ""
+
+.PHONY: all directories plugins clean cleanall run help
