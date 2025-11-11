@@ -48,13 +48,13 @@ bool CommandRegistry::ProcessCommands(istream& rStrm) const {
     int lineNumber = 0;
     bool allSuccess = true;
     
-    cout << "\nPrzetwarzanie poleceń" << endl;
+    cout << "\n=== Przetwarzanie poleceń ===" << endl;
     
     while (getline(rStrm, line)) {
         lineNumber++;
         
-        // Pomiń puste linie i komentarze
-        if (line.empty() || line[0] == '#') {
+        // Pomiń puste linie
+        if (line.empty()) {
             continue;
         }
         
@@ -64,6 +64,11 @@ bool CommandRegistry::ProcessCommands(istream& rStrm) const {
             continue;
         }
         line = line.substr(start);
+        
+        // Pomiń komentarze (linie zaczynające się od #)
+        if (line[0] == '#') {
+            continue;
+        }
         
         // Wyodrębnij nazwę polecenia (pierwsze słowo)
         istringstream lineStream(line);
@@ -87,7 +92,29 @@ bool CommandRegistry::ProcessCommands(istream& rStrm) const {
             continue;
         }
         
-        // Wczytaj parametry
+        // UWAGA: Polecenie Pause NIE wymaga nazwy obiektu!
+        string objName;
+        
+        if (cmdName != "Pause") {
+            // Wczytaj nazwę obiektu (dla Set, Move, Rotate)
+            lineStream >> objName;
+            
+            if (lineStream.fail() || objName.empty()) {
+                cerr << "!!! Błąd w linii " << lineNumber 
+                     << ": Brak nazwy obiektu dla polecenia '" << cmdName << "'" << endl;
+                cout << "Oczekiwana składnia:" << endl;
+                pCmd->PrintSyntax();
+                allSuccess = false;
+                delete pCmd;
+                continue;
+            }
+            
+            cout << "Obiekt: " << objName << endl;
+        } else {
+            objName = ""; // Pause nie używa nazwy obiektu
+        }
+        
+        // Wczytaj parametry (po nazwie obiektu lub bezpośrednio dla Pause)
         if (!pCmd->ReadParams(lineStream)) {
             cerr << "!!! Błąd w linii " << lineNumber 
                  << ": Nie można wczytać parametrów polecenia '" << cmdName << "'" << endl;
@@ -104,16 +131,24 @@ bool CommandRegistry::ProcessCommands(istream& rStrm) const {
         
         // Wyświetl pełne polecenie
         cout << "Pełna postać: ";
+        if (!objName.empty()) {
+            cout << cmdName << " " << objName << " ";
+        }
         pCmd->PrintCmd();
+        
+        // TODO: W przyszłości tutaj będzie wywołanie:
+        // pCmd->ExecCmd(scene, objName.c_str(), comChannel);
         
         delete pCmd;
     }
+    
+    cout << "\n=== Koniec przetwarzania ===" << endl;
       
     return allSuccess;
 }
 
 void CommandRegistry::PrintAvailableCommands() const {
-    cout << "\nDostępne polecenia" << endl;
+    cout << "\n=== Dostępne polecenia ===" << endl;
     
     if (_commandMap.empty()) {
         cout << "Brak zarejestrowanych poleceń." << endl;
@@ -131,3 +166,23 @@ void CommandRegistry::PrintAvailableCommands() const {
     
     cout << endl;
 }
+
+//Sposób na implementację ProcessCommands bez przetwarzania linii po linii.
+
+//StdIn >> Słowo
+//pIter = KolekcjaWtyczek.find(Słowo),
+//pIter -> ReadParams(StdIn);
+//pIter -> StdIn>>NazwaObiektu>>Szybkość>>Dystans;
+//return !StdIn.fail();
+//char Tab[101];
+//scanf("%100s",Tab);
+//intRes=scanf("%d",&Zmienna);
+//return intRes==1;
+//Czytamy z tego co nam preprocesor przetworzy żeby nie było komentarzy ani makr
+
+//To do:
+//3. Przerobić commandregistry by korzystał z rozwiązania powyżej
+//4. Uporządkować maina konfiguracjaXML->Ładowanie wtyczek->Plik CMD przetwarzany przez Preprocesor->CommandRegistryz->ReadParams w określonej wtyczce->PrintParams->ExecCmd    
+//5. Uporządkować resztę kodu
+//6. Przetestować całość
+//7. Nauczyć się kodu oraz to co jakiego typu są zmienne przy mapie (iterator w kolekcji bibliotek, lepsza metoda by zwracało wskaźnik do obiektu polecenia)

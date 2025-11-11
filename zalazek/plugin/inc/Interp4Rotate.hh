@@ -7,6 +7,7 @@
 #endif
 
 #include "AbstractInterp4Command.hh"
+#include <string>
 
 /*!
  * \file
@@ -16,16 +17,19 @@
  */
 
 /*!
- * \brief Modeluje polecenie obracające obiekt mobilny
+ * \brief Modeluje polecenie obracające obiekt 
  *
  * Klasa modeluje polecenie Rotate, które obraca obiekt
- * o zadany kąt w radianach
+ * wokół zadanej osi z określoną prędkością kątową na określony kąt
  */
 class Interp4Rotate: public AbstractInterp4Command {
   /*
-   * Pola przechowujące wartości parametrów polecenia
+   * Wartości parametrów polecenia
    */
-  double  _Angle_rad;
+  std::string _AxisName;           // Nazwa osi: OX, OY lub OZ
+  double      _AngularSpeed_degS;  // Prędkość kątowa [stopnie/s]
+  double      _Angle_deg;          // Kąt obrotu [stopnie]
+  
  public:
   /*!
    * \brief Konstruktor
@@ -42,7 +46,7 @@ class Interp4Rotate: public AbstractInterp4Command {
   /*!
    * \brief Wyświetla wartości wczytanych parametrów
    */
-  virtual void PrintParams() const override {} 
+  virtual void PrintParams() const override;
 
   /*!
    * \brief Wyświetla nazwę polecenia
@@ -66,8 +70,7 @@ class Interp4Rotate: public AbstractInterp4Command {
    * \brief Czyta wartości parametrów danego polecenia
    */
   virtual bool ReadParams(std::istream& Strm_CmdsList) override;
-
-  
+ 
   /*!
    * \brief Tworzy instancję polecenia
    *

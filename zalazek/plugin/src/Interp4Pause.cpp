@@ -21,7 +21,7 @@ AbstractInterp4Command* CreateCmd(void)
 /*!
  * \brief Konstruktor
  */
-Interp4Pause::Interp4Pause(): _Time_s(0)
+Interp4Pause::Interp4Pause(): _Time_ms(0)
 {}
 
 /*!
@@ -29,7 +29,15 @@ Interp4Pause::Interp4Pause(): _Time_s(0)
  */
 void Interp4Pause::PrintCmd() const
 {
-  cout << GetCmdName() << " " << _Time_s << " s" << endl;
+  cout << GetCmdName() << " " << _Time_ms << " ms" << endl;
+}
+
+/*!
+ * \brief Wyświetla wartości wczytanych parametrów
+ */
+void Interp4Pause::PrintParams() const
+{
+  cout << "Czas pauzy: " << _Time_ms << " ms (" << (_Time_ms / 1000.0) << " s)" << endl;
 }
 
 /*!
@@ -49,6 +57,7 @@ bool Interp4Pause::ExecCmd( AbstractScene      &rScn,
 {
   // TODO: Implementacja wykonania polecenia w kolejnych etapach
   cout << "Wykonywanie polecenia Pause dla obiektu: " << sMobObjName << endl;
+  PrintParams();
   return true;
 }
 
@@ -56,13 +65,13 @@ bool Interp4Pause::ExecCmd( AbstractScene      &rScn,
  * \brief Wczytuje parametry polecenia Pause ze strumienia
  * 
  * Polecenie Pause wymaga parametru:
- * - Czas wstrzymania [s]
+ * - Czas wstrzymania [ms]
  */
 bool Interp4Pause::ReadParams(std::istream& Strm_CmdsList)
 {
   double time;
   
-  // Wczytaj czas
+  // Wczytaj czas w milisekundach
   Strm_CmdsList >> time;
   if (Strm_CmdsList.fail()) {
     cerr << "!!! Błąd: Nie można wczytać czasu wstrzymania." << endl;
@@ -75,7 +84,7 @@ bool Interp4Pause::ReadParams(std::istream& Strm_CmdsList)
     return false;
   }
   
-  _Time_s = time;
+  _Time_ms = time;
   
   return true;
 }
@@ -93,5 +102,5 @@ AbstractInterp4Command* Interp4Pause::CreateCmd()
  */
 void Interp4Pause::PrintSyntax() const
 {
-  cout << "   Pause  Czas[s]" << endl;
+  cout << "   Pause  Czas_pauzy[ms]" << endl;
 }

@@ -4,6 +4,7 @@
 using std::cout;
 using std::endl;
 using std::cerr;
+using std::string;
 
 extern "C" {
   AbstractInterp4Command* CreateCmd(void);
@@ -21,7 +22,7 @@ AbstractInterp4Command* CreateCmd(void)
 /*!
  * \brief Konstruktor
  */
-Interp4Rotate::Interp4Rotate(): _Angle_rad(0)
+Interp4Rotate::Interp4Rotate(): _AxisName(""), _AngularSpeed_degS(0), _Angle_deg(0)
 {}
 
 /*!
@@ -29,7 +30,17 @@ Interp4Rotate::Interp4Rotate(): _Angle_rad(0)
  */
 void Interp4Rotate::PrintCmd() const
 {
-  cout << GetCmdName() << " " << _Angle_rad << " rad" << endl;
+  cout << GetCmdName() << " " << _AxisName << " " 
+       << _AngularSpeed_degS << "stopni/s " << _Angle_deg << "stopni" << endl;
+}
+
+/*!
+ * \brief Wyświetla wartości wczytanych parametrów
+ */
+void Interp4Rotate::PrintParams() const
+{
+  cout << "Oś: " << _AxisName << ", Prędkość kątowa: " << _AngularSpeed_degS 
+       << " stopni/s, Kąt: " << _Angle_deg << "stopni" << endl;
 }
 
 /*!
@@ -49,27 +60,59 @@ bool Interp4Rotate::ExecCmd( AbstractScene      &rScn,
 {
   // TODO: Implementacja wykonania polecenia w kolejnych etapach
   cout << "Wykonywanie polecenia Rotate dla obiektu: " << sMobObjName << endl;
+  PrintParams();
   return true;
 }
 
 /*!
  * \brief Wczytuje parametry polecenia Rotate ze strumienia
  * 
- * Polecenie Rotate wymaga parametru:
- * - Kąt obrotu [rad]
+ * Polecenie Rotate wymaga parametrów:
+ * - Nazwa osi (OX, OY lub OZ)
+ * - Prędkość kątowa [°/s]
+ * - Kąt obrotu [°]
  */
 bool Interp4Rotate::ReadParams(std::istream& Strm_CmdsList)
 {
-  double angle;
+  string axis_name;
+  double angular_speed, angle;
   
-  // Wczytaj kąt
+  // Wczytaj nazwę osi
+  Strm_CmdsList >> axis_name;
+  if (Strm_CmdsList.fail()) {
+    cerr << "!!! Błąd: Nie można wczytać nazwy osi." << endl;
+    return false;
+  }
+  
+  // Walidacja nazwy osi
+  if (axis_name != "OX" && axis_name != "OY" && axis_name != "OZ") {
+    cerr << "!!! Błąd: Niepoprawna nazwa osi. Dozwolone: OX, OY, OZ." << endl;
+    return false;
+  }
+  
+  // Wczytaj prędkość kątową
+  Strm_CmdsList >> angular_speed;
+  if (Strm_CmdsList.fail()) {
+    cerr << "!!! Błąd: Nie można wczytać prędkości kątowej." << endl;
+    return false;
+  }
+  
+  // Wczytaj kąt obrotu
   Strm_CmdsList >> angle;
   if (Strm_CmdsList.fail()) {
     cerr << "!!! Błąd: Nie można wczytać kąta obrotu." << endl;
     return false;
   }
   
-  _Angle_rad = angle;
+  // Walidacja kąta (musi być nieujemny zgodnie z opisem zadania)
+  if (angle < 0) {
+    cerr << "!!! Błąd: Kąt obrotu musi być nieujemny." << endl;
+    return false;
+  }
+  
+  _AxisName = axis_name;
+  _AngularSpeed_degS = angular_speed;
+  _Angle_deg = angle;
   
   return true;
 }
@@ -87,5 +130,5 @@ AbstractInterp4Command* Interp4Rotate::CreateCmd()
  */
 void Interp4Rotate::PrintSyntax() const
 {
-  cout << "   Rotate  Kat[rad]" << endl;
+  cout << "   Rotate  Nazwa_obiektu  Nazwa_Osi  Szybkosc_katowa[stopnie/s]  Kat_obrotu[stopni]]" << endl;
 }

@@ -143,7 +143,7 @@ void XMLInterp4Config::ProcessCubeAttrs(const xercesc::Attributes &rAttrs)
         xercesc::XMLString::release(&sAttrValue);
     }
 
-    // Dodaj obiekt Cube do konfiguracji
+    // Dodajemy obiekt Cube do konfiguracji
     _rConfig.AddCube(cube);
 }
 
@@ -168,7 +168,7 @@ void XMLInterp4Config::WhenStartElement(const std::string &rElemName,
     // Ignoruj inne elementy (Config, Plugins, Objects)
 }
 
-/*!
+/*
  * Metoda wywoływana po napotkaniu nowego elementu XML.
  */
 void XMLInterp4Config::startElement(const XMLCh *const pURI,
@@ -189,17 +189,17 @@ void XMLInterp4Config::startElement(const XMLCh *const pURI,
     xercesc::XMLString::release(&sElemName);
 }
 
-/*!
+/*
  * Metoda wywoływana po zakończeniu elementu XML.
  */
 void XMLInterp4Config::endElement(const XMLCh *const pURI,
                                   const XMLCh *const pLocalName,
                                   const XMLCh *const pQName)
 {
-    // Możemy tutaj dodać kod, jeśli będzie potrzebny
+    
 }
 
-/*!
+/*
  * Obsługa błędu fatalnego
  */
 void XMLInterp4Config::fatalError(const xercesc::SAXParseException &rException)
@@ -218,7 +218,7 @@ void XMLInterp4Config::fatalError(const xercesc::SAXParseException &rException)
     xercesc::XMLString::release(&sSystemId);
 }
 
-/*!
+/*
  * Obsługa błędu
  */
 void XMLInterp4Config::error(const xercesc::SAXParseException &rException)
@@ -230,7 +230,7 @@ void XMLInterp4Config::error(const xercesc::SAXParseException &rException)
     xercesc::XMLString::release(&sMessage);
 }
 
-/*!
+/*
  * Obsługa ostrzeżenia
  */
 void XMLInterp4Config::warning(const xercesc::SAXParseException &rException)

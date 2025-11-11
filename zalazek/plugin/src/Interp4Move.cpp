@@ -85,6 +85,12 @@ bool Interp4Move::ReadParams(std::istream& Strm_CmdsList)
     return false;
   }
   
+  // Walidacja: długość drogi musi być nieujemna
+  if (distance < 0) {
+    cerr << "!!! Błąd: Długość drogi musi być nieujemna." << endl;
+    return false;
+  }
+  
   _Speed_mmS = speed;
   _Distance_m = distance;
   
@@ -104,5 +110,5 @@ AbstractInterp4Command* Interp4Move::CreateCmd()
  */
 void Interp4Move::PrintSyntax() const
 {
-  cout << "   Move  Szybkosc[m/s]  DlugoscDrogi[m]" << endl;
+  cout << "   Move  Nazwa_obiektu  Szybkosc[m/s]  DlugoscDrogi[m]" << endl;
 }

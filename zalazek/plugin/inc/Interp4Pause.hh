@@ -19,13 +19,14 @@
  * \brief Modeluje polecenie wstrzymujące obiekt mobilny
  *
  * Klasa modeluje polecenie Pause, które wstrzymuje obiekt
- * na zadany czas wyrażony w sekundach
+ * na zadany czas wyrażony w milisekundach
  */
 class Interp4Pause: public AbstractInterp4Command {
   /*
    * Pola przechowujące wartości parametrów polecenia
    */
-  double  _Time_s;
+  double  _Time_ms;  // Czas w milisekundach
+  
  public:
   /*!
    * \brief Konstruktor
@@ -42,7 +43,7 @@ class Interp4Pause: public AbstractInterp4Command {
   /*!
    * \brief Wyświetla wartości wczytanych parametrów
    */
-  virtual void PrintParams() const override {} 
+  virtual void PrintParams() const override;
 
   /*!
    * \brief Wyświetla nazwę polecenia

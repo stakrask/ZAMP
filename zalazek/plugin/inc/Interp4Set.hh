@@ -16,24 +16,28 @@
  */
 
 /*!
- * \brief Modeluje polecenie ustawiające pozycję obiektu mobilnego
+ * \brief Modeluje polecenie ustawiające pozycję i orientację obiektu mobilnego
  *
- * Klasa modeluje polecenie Set, które ustawia pozycję obiektu
- * na zadane współrzędne x i y
+ * Klasa modeluje polecenie Set, które ustawia pozycję obiektu na zadane współrzędne x, y, z oraz orientację poprzez kąty względem osi OX, OY, OZ
  */
 class Interp4Set: public AbstractInterp4Command {
   /*
-   * Pola przechowujące wartości parametrów polecenia
+   * Wartości parametrów polecenia
    */
   double  _Pos_X;
   double  _Pos_Y;
+  double  _Pos_Z;
+  double  _Angle_OX_deg;
+  double  _Angle_OY_deg;
+  double  _Angle_OZ_deg;
+  
  public:
   /*!
    * \brief Konstruktor
    */
   Interp4Set();  
   /*!
-   * \brief Wyświetla postać bieżącego polecenia (nazwę oraz wartości parametrów)
+   * \brief Wyświetla postać bieżącego polecenia
    */
   virtual void PrintCmd() const override;
   /*!
@@ -43,7 +47,7 @@ class Interp4Set: public AbstractInterp4Command {
   /*!
    * \brief Wyświetla wartości wczytanych parametrów
    */
-  virtual void PrintParams() const override {} 
+  virtual void PrintParams() const override;
 
   /*!
    * \brief Wyświetla nazwę polecenia
@@ -67,8 +71,7 @@ class Interp4Set: public AbstractInterp4Command {
    * \brief Czyta wartości parametrów danego polecenia
    */
   virtual bool ReadParams(std::istream& Strm_CmdsList) override;
-
-  
+ 
   /*!
    * \brief Tworzy instancję polecenia
    *

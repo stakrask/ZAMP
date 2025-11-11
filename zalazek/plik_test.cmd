@@ -1,6 +1,9 @@
-#define SPEED 5.0
-Move SPEED 10.0
-Rotate 90 45.0 // Obrót o 90 stopni z prędkością 45.0
+#define ROTATE_SPEED 30
+
+Set Ob_A 2 0 3 30 10 0
+Set Ob_B 10 10 5 0 0 20
+Rotate Ob_B OY ROTATE_SPEED 40 //komentarz testowy
 Pause 1000
-Move 0.0 SPEED // Zatrzymanie robota
-Set 1.0 2.0 0.5 0 0 90
+Move Ob_A 10 10
+Rotate Ob_B OZ ROTATE_SPEED 60 //inny komentarz
+Move Ob_B 10 20

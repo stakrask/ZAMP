@@ -49,7 +49,7 @@ bool ReadXMLConfiguration(const char* sFileName, Configuration &rConfig)
     pParser->setErrorHandler(pHandler);
 
     try {
-        // Załaduj gramatykę (schema XSD)
+        // Załadujemy gramatykę (schema XSD)
         if (!pParser->loadGrammar("config/config.xsd",
                                   Grammar::SchemaGrammarType, true)) {
             cerr << "!!! Błąd: Plik config/config.xsd nie może zostać wczytany." << endl;
@@ -60,7 +60,7 @@ bool ReadXMLConfiguration(const char* sFileName, Configuration &rConfig)
         
         pParser->setFeature(XMLUni::fgXercesUseCachedGrammarInParse, true);
         
-        // Parsuj plik XML
+        // Parsujemy plik XML
         pParser->parse(sFileName);
     }
     catch (const XMLException& Exception) {
@@ -125,7 +125,7 @@ int main(int argc, char* argv[])
     cout << "WTYCZKI" << endl;
     
     for (const auto& libPath : config.GetLibraries()) {
-        // Dodaj prefix "libs/" jeśli nie ma pełnej ścieżki
+        // Dodajemy prefix "libs/" jeśli nie ma pełnej ścieżki
         string fullPath = libPath;
         if (fullPath.find('/') == string::npos) {
             fullPath = "libs/" + libPath;
