@@ -13,15 +13,6 @@
 using namespace std;
 using namespace xercesc;
 
-/*!
- * \brief Wczytuje konfigurację z pliku XML
- * 
- * Czyta z pliku opis konfiguracji sceny (wtyczki i obiekty).
- * \param[in] sFileName - nazwa pliku z konfiguracją XML
- * \param[out] rConfig - obiekt konfiguracji, do którego zapisywane są dane
- * \retval true - jeśli wczytanie zostało zrealizowane poprawnie
- * \retval false - w przypadku błędu
- */
 bool ReadXMLConfiguration(const char* sFileName, Configuration &rConfig)
 {
     try {
@@ -49,7 +40,6 @@ bool ReadXMLConfiguration(const char* sFileName, Configuration &rConfig)
     pParser->setErrorHandler(pHandler);
 
     try {
-        // Załadujemy gramatykę (schema XSD)
         if (!pParser->loadGrammar("config/config.xsd",
                                   Grammar::SchemaGrammarType, true)) {
             cerr << "!!! Błąd: Plik config/config.xsd nie może zostać wczytany." << endl;
@@ -59,8 +49,6 @@ bool ReadXMLConfiguration(const char* sFileName, Configuration &rConfig)
         }
         
         pParser->setFeature(XMLUni::fgXercesUseCachedGrammarInParse, true);
-        
-        // Parsujemy plik XML
         pParser->parse(sFileName);
     }
     catch (const XMLException& Exception) {
@@ -105,27 +93,18 @@ bool ReadXMLConfiguration(const char* sFileName, Configuration &rConfig)
 
 int main(int argc, char* argv[])
 {
-
     Configuration config;
     
     const string configFile = "config/config.xml";
-    cout << "KONFIG Z XML" << endl;
-    cout << "Plik: " << configFile << endl << endl;
     
     if (!ReadXMLConfiguration(configFile.c_str(), config)) {
-        cerr << "\n!!! Błąd: Nie udało się wczytać konfiguracji z pliku XML." << endl;
+        cerr << "!!! Błąd: Nie udało się wczytać konfiguracji z pliku XML." << endl;
         return 1;
     }
-    
-    cout << "\n Konfiguracja:" << endl;
-    config.PrintSummary();
 
     CommandRegistry registry;
     
-    cout << "WTYCZKI" << endl;
-    
     for (const auto& libPath : config.GetLibraries()) {
-        // Dodajemy prefix "libs/" jeśli nie ma pełnej ścieżki
         string fullPath = libPath;
         if (fullPath.find('/') == string::npos) {
             fullPath = "libs/" + libPath;
@@ -135,12 +114,8 @@ int main(int argc, char* argv[])
             cerr << "!!! Ostrzeżenie: Problem z załadowaniem " << fullPath << endl;
         }
     }
-    
-    cout << endl;
-    registry.PrintAvailableCommands();
 
     const string inputFile = "plik_test.cmd";
-    cout << "PLIK CMD" << inputFile << " ===" << endl;
     
     const string preprocessedOutput = RunPreprocessor(inputFile.c_str());
     
@@ -149,13 +124,10 @@ int main(int argc, char* argv[])
         return 1;
     }
     
-    cout << "PREPROCESOR" << endl;
-    cout << preprocessedOutput << endl;
-    
     istringstream cmdStream(preprocessedOutput);
     
     if (!registry.ProcessCommands(cmdStream)) {
-        cerr << "\n!!! Ostrzeżenie: Niektóre polecenia nie zostały poprawnie przetworzone." << endl;
+        cerr << "!!! Ostrzeżenie: Niektóre polecenia nie zostały poprawnie przetworzone." << endl;
     }
 
     return 0;

@@ -27,7 +27,7 @@ private:
     /*!
      * \brief Mapa łącząca nazwy poleceń z interfejsami bibliotek
      */
-    std::map<std::string, std::unique_ptr<LibInterface>> _commandMap;
+    std::map<std::string, std::shared_ptr<LibInterface>> _commandMap;
 
 public:
     /*!
@@ -75,14 +75,6 @@ public:
      * \retval false - wystąpił błąd podczas przetwarzania
      */
     bool ProcessCommands(std::istream& rStrm) const;
-    
-    /*!
-     * \brief Wyświetla listę zarejestrowanych poleceń
-     *
-     * Wypisuje nazwy wszystkich zarejestrowanych poleceń
-     * wraz z ich składnią.
-     */
-    void PrintAvailableCommands() const;
 };
 
 #endif
