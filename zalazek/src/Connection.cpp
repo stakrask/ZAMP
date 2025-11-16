@@ -1,6 +1,7 @@
 #include "Connection.hh"
 #include <iostream>
 #include <cstring>
+#include <sstream>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -67,6 +68,7 @@ int Send(int Socket, const char* sMessage) {
     
     return 0;
 }
+
 
 void CloseConnection(int Socket) {
     if (Socket >= 0) {

@@ -79,6 +79,13 @@ public:
      * \brief Wyświetla podsumowanie konfiguracji
      */
     void PrintSummary() const;
+
+    /*!
+     * \brief Generuje polecenie AddObj dla danego obiektu Cube
+     * \param[in] cube - parametry obiektu
+     * \return String zawierający polecenie AddObj
+     */
+    static std::string GenerateAddObjCommand(const CubeParams& cube);
 };
 
 #endif
