@@ -18,7 +18,9 @@ SOURCES = $(SRC_DIR)/main.cpp \
           $(SRC_DIR)/Preprocessor.cpp \
           $(SRC_DIR)/Configuration.cpp \
           $(SRC_DIR)/xmlinterp.cpp \
-          $(SRC_DIR)/Connection.cpp
+          $(SRC_DIR)/Connection.cpp \
+          $(SRC_DIR)/Scene.cpp \
+          $(SRC_DIR)/MobileObj.cpp
 
 # Pliki obiektowe
 OBJECTS = $(patsubst $(SRC_DIR)/%.cpp,$(OBJ_DIR)/%.o,$(SOURCES))
@@ -65,7 +67,8 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
 # Zależności
 $(OBJ_DIR)/main.o: $(SRC_DIR)/main.cpp $(INC_DIR)/Preprocessor.hh \
                    $(INC_DIR)/CommandRegistry.hh $(INC_DIR)/Configuration.hh \
-                   $(INC_DIR)/xmlinterp.hh $(INC_DIR)/Connection.hh
+                   $(INC_DIR)/xmlinterp.hh $(INC_DIR)/Connection.hh \
+                   $(INC_DIR)/Scene.hh $(INC_DIR)/MobileObj.hh
 
 $(OBJ_DIR)/CommandRegistry.o: $(SRC_DIR)/CommandRegistry.cpp \
                                $(INC_DIR)/CommandRegistry.hh \
@@ -88,6 +91,17 @@ $(OBJ_DIR)/xmlinterp.o: $(SRC_DIR)/xmlinterp.cpp \
 
 $(OBJ_DIR)/Connection.o: $(SRC_DIR)/Connection.cpp \
                          $(INC_DIR)/Connection.hh
+
+$(OBJ_DIR)/Scene.o: $(SRC_DIR)/Scene.cpp $(INC_DIR)/Scene.hh \
+                    $(INC_DIR)/AbstractScene.hh $(INC_DIR)/MobileObj.hh
+	@echo "Kompilacja: $<"
+	$(CXX) $(CXXFLAGS) -c $< -o $@
+
+$(OBJ_DIR)/MobileObj.o: $(SRC_DIR)/MobileObj.cpp $(INC_DIR)/MobileObj.hh \
+                        $(INC_DIR)/AbstractMobileObj.hh \
+                        $(INC_DIR)/Configuration.hh $(INC_DIR)/Vector3D.hh
+	@echo "Kompilacja: $<"
+	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 # Czyszczenie
 clean:
