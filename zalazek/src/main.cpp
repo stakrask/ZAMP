@@ -9,6 +9,7 @@
 #include "CommandRegistry.hh"
 #include "Configuration.hh"
 #include "xmlinterp.hh"
+#include "Connection.hh"
 
 using namespace std;
 using namespace xercesc;
@@ -93,17 +94,21 @@ bool ReadXMLConfiguration(const char* sFileName, Configuration &rConfig)
 
 int main(int argc, char* argv[])
 {
+    // Wczytanie konfiguracji XML
     Configuration config;
-    
     const string configFile = "config/config.xml";
     
+    cout << "Wczytywanie konfiguracji z pliku: " << configFile << endl;
     if (!ReadXMLConfiguration(configFile.c_str(), config)) {
         cerr << "!!! Błąd: Nie udało się wczytać konfiguracji z pliku XML." << endl;
         return 1;
     }
+    cout << "Konfiguracja wczytana pomyślnie." << endl << endl;
 
+    // Rejestracja wtyczek
     CommandRegistry registry;
     
+    cout << "Rejestrowanie wtyczek..." << endl;
     for (const auto& libPath : config.GetLibraries()) {
         string fullPath = libPath;
         if (fullPath.find('/') == string::npos) {
@@ -114,13 +119,35 @@ int main(int argc, char* argv[])
             cerr << "!!! Ostrzeżenie: Problem z załadowaniem " << fullPath << endl;
         }
     }
+    cout << "Wtyczki zarejestrowane." << endl << endl;
 
+    // Nawiązanie połączenia z serwerem graficznym
+    int socket = -1;
+    
+    if (!OpenConnection(socket)) {
+        cerr << "!!! Błąd: Nie można nawiązać połączenia z serwerem graficznym." << endl;
+        return 1;
+    }
+    
+    // Test połączenia - wyślij Clear
+    cout << "Wysłanie testowego polecenia clear" << endl;
+    if (Send(socket, "Clear\n") == 0) {
+        cout << "Polecenie Clear wysłane." << endl;
+    } else {
+        cerr << "!!! Błąd wysyłania polecenia Clear." << endl;
+    }
+    
+    cout << endl;
+
+    // Przetwarzanie pliku poleceń (na razie tylko odczyt i wyświetlenie)
     const string inputFile = "plik_test.cmd";
     
+    cout << "Przetwarzanie pliku poleceń: " << inputFile << endl;
     const string preprocessedOutput = RunPreprocessor(inputFile.c_str());
     
     if (preprocessedOutput.empty()) {
         cerr << "!!! Błąd: Nie udało się przetworzyć pliku przez preprocesor." << endl;
+        CloseConnection(socket);
         return 1;
     }
     
@@ -130,5 +157,8 @@ int main(int argc, char* argv[])
         cerr << "!!! Ostrzeżenie: Niektóre polecenia nie zostały poprawnie przetworzone." << endl;
     }
 
+    // Zamknięcie połączenia
+    CloseConnection(socket);
+    
     return 0;
 }

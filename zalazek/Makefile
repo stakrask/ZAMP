@@ -1,4 +1,3 @@
-
 # Kompilator i flagi
 CXX = g++
 CXXFLAGS = -Wall -g -pedantic -std=c++17 -Iinc
@@ -18,7 +17,8 @@ SOURCES = $(SRC_DIR)/main.cpp \
           $(SRC_DIR)/LibInterface.cpp \
           $(SRC_DIR)/Preprocessor.cpp \
           $(SRC_DIR)/Configuration.cpp \
-          $(SRC_DIR)/xmlinterp.cpp
+          $(SRC_DIR)/xmlinterp.cpp \
+          $(SRC_DIR)/Connection.cpp
 
 # Pliki obiektowe
 OBJECTS = $(patsubst $(SRC_DIR)/%.cpp,$(OBJ_DIR)/%.o,$(SOURCES))
@@ -62,10 +62,10 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
 	@echo "Kompilacja: $<"
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
-# Zależności (można wygenerować automatycznie, ale tutaj ręcznie dla prostoty)
+# Zależności
 $(OBJ_DIR)/main.o: $(SRC_DIR)/main.cpp $(INC_DIR)/Preprocessor.hh \
                    $(INC_DIR)/CommandRegistry.hh $(INC_DIR)/Configuration.hh \
-                   $(INC_DIR)/xmlinterp.hh
+                   $(INC_DIR)/xmlinterp.hh $(INC_DIR)/Connection.hh
 
 $(OBJ_DIR)/CommandRegistry.o: $(SRC_DIR)/CommandRegistry.cpp \
                                $(INC_DIR)/CommandRegistry.hh \
@@ -85,6 +85,9 @@ $(OBJ_DIR)/Configuration.o: $(SRC_DIR)/Configuration.cpp \
 $(OBJ_DIR)/xmlinterp.o: $(SRC_DIR)/xmlinterp.cpp \
                        $(INC_DIR)/xmlinterp.hh \
                        $(INC_DIR)/Configuration.hh
+
+$(OBJ_DIR)/Connection.o: $(SRC_DIR)/Connection.cpp \
+                         $(INC_DIR)/Connection.hh
 
 # Czyszczenie
 clean:
