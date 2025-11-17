@@ -2,7 +2,7 @@
 CXX = g++
 CXXFLAGS = -Wall -g -pedantic -std=c++17 -Iinc
 LDFLAGS = -Wall
-LIBS = -lxerces-c
+LIBS = -lxerces-c -lpthread
 
 # Katalogi
 SRC_DIR = src
@@ -18,7 +18,7 @@ SOURCES = $(SRC_DIR)/main.cpp \
           $(SRC_DIR)/Preprocessor.cpp \
           $(SRC_DIR)/Configuration.cpp \
           $(SRC_DIR)/xmlinterp.cpp \
-          $(SRC_DIR)/Connection.cpp \
+          $(SRC_DIR)/ComChannel.cpp \
           $(SRC_DIR)/Scene.cpp \
           $(SRC_DIR)/MobileObj.cpp
 
@@ -67,7 +67,7 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
 # Zależności
 $(OBJ_DIR)/main.o: $(SRC_DIR)/main.cpp $(INC_DIR)/Preprocessor.hh \
                    $(INC_DIR)/CommandRegistry.hh $(INC_DIR)/Configuration.hh \
-                   $(INC_DIR)/xmlinterp.hh $(INC_DIR)/Connection.hh \
+                   $(INC_DIR)/xmlinterp.hh $(INC_DIR)/ComChannel.hh \
                    $(INC_DIR)/Scene.hh $(INC_DIR)/MobileObj.hh
 
 $(OBJ_DIR)/CommandRegistry.o: $(SRC_DIR)/CommandRegistry.cpp \
@@ -91,6 +91,12 @@ $(OBJ_DIR)/xmlinterp.o: $(SRC_DIR)/xmlinterp.cpp \
 
 $(OBJ_DIR)/Connection.o: $(SRC_DIR)/Connection.cpp \
                          $(INC_DIR)/Connection.hh
+
+$(OBJ_DIR)/ComChannel.o: $(SRC_DIR)/ComChannel.cpp \
+                         $(INC_DIR)/ComChannel.hh \
+                         $(INC_DIR)/AbstractComChannel.hh
+	@echo "Kompilacja: $<"
+	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 $(OBJ_DIR)/Scene.o: $(SRC_DIR)/Scene.cpp $(INC_DIR)/Scene.hh \
                     $(INC_DIR)/AbstractScene.hh $(INC_DIR)/MobileObj.hh

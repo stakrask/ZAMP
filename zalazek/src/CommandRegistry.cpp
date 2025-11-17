@@ -9,18 +9,18 @@ bool CommandRegistry::RegisterCommand(const string &sLibPath)
 {
     shared_ptr<LibInterface> pLibInterface(new LibInterface());
 
-    if (!pLibInterface->LoadLibrary(sLibPath)) // Załadowanie odpowiedniej biblioteki
+    if (!pLibInterface->LoadLibrary(sLibPath))
     {
         cerr << "!!! Błąd: Nie można załadować biblioteki: " << sLibPath << endl;
         return false;
     }
-    const char *cmdName = pLibInterface->GetCmdName(); // Pobranie nazwy polecenia
+    const char *cmdName = pLibInterface->GetCmdName();
     if (!cmdName)
     {
         cerr << "!!! Błąd: Nie można pobrać nazwy polecenia z: " << sLibPath << endl;
         return false;
     }
-    string sCmdName(cmdName); // Rejestracja polecenia w mapie
+    string sCmdName(cmdName);
     if (_commandMap.find(sCmdName) != _commandMap.end())
     {
         cerr << "!!! Ostrzeżenie: Polecenie '" << sCmdName
@@ -36,7 +36,6 @@ AbstractInterp4Command *CommandRegistry::CreateCommand(const string &sCmdName) c
 {
     map<string, shared_ptr<LibInterface>>::const_iterator it = _commandMap.find(sCmdName);
 
-    // W przypadku braku polecenia w kolekcji
     if (it == _commandMap.end())
     {
         cerr << "!!! Błąd: Nieznane polecenie: '" << sCmdName << "'" << endl;
@@ -46,15 +45,18 @@ AbstractInterp4Command *CommandRegistry::CreateCommand(const string &sCmdName) c
     return it->second->CreateCmd();
 }
 
-// Przetwarzanie pliku poleceń
-bool CommandRegistry::ProcessCommands(istream &rStrm) const
+// Przetwarzanie pliku poleceń z wykonywaniem ExecCmd
+bool CommandRegistry::ProcessCommands(istream &rStrm, 
+                                     AbstractScene &rScene,
+                                     AbstractComChannel &rComChannel) const
 {
     string cmdName;
     bool allSuccess = true;
 
     while (rStrm >> cmdName)
     {
-        map<string, shared_ptr<LibInterface>>::const_iterator pIter = _commandMap.find(cmdName); // Wyszukanie polecenia w kolekcji
+        // Wyszukanie polecenia w kolekcji
+        map<string, shared_ptr<LibInterface>>::const_iterator pIter = _commandMap.find(cmdName);
         if (pIter == _commandMap.end())
         {
             cerr << "!!! Błąd: Nieznane polecenie '" << cmdName << "'" << endl;
@@ -62,7 +64,9 @@ bool CommandRegistry::ProcessCommands(istream &rStrm) const
             rStrm.ignore(numeric_limits<streamsize>::max(), '\n');
             continue;
         }
-        AbstractInterp4Command *pCmd = pIter->second->CreateCmd(); // Utworzenie polecenia odpowiadającego nazwie
+        
+        // Utworzenie polecenia
+        AbstractInterp4Command *pCmd = pIter->second->CreateCmd();
         if (!pCmd)
         {
             cerr << "!!! Błąd: Nie można utworzyć obiektu polecenia '" << cmdName << "'" << endl;
@@ -70,12 +74,14 @@ bool CommandRegistry::ProcessCommands(istream &rStrm) const
             rStrm.ignore(numeric_limits<streamsize>::max(), '\n');
             continue;
         }
+        
+        // Wczytaj nazwę obiektu (jeśli nie jest to Pause)
         string objName;
-        if (cmdName != "Pause") // Przykład dla polecenia "Pause" bez nazwy obiektu
+        if (cmdName != "Pause")
         {
             rStrm >> objName;
 
-            if (rStrm.fail() || objName.empty()) // Sprawdzenie poprawności nazwy obiektu
+            if (rStrm.fail() || objName.empty())
             {
                 cerr << "!!! Błąd: Brak nazwy obiektu dla polecenia '" << cmdName << "'" << endl;
                 pCmd->PrintSyntax();
@@ -86,7 +92,9 @@ bool CommandRegistry::ProcessCommands(istream &rStrm) const
                 continue;
             }
         }
-        if (!pCmd->ReadParams(rStrm)) // Wczytanie parametrów polecenia
+        
+        // Wczytanie parametrów polecenia
+        if (!pCmd->ReadParams(rStrm))
         {
             cerr << "!!! Błąd: Nie można wczytać parametrów polecenia '" << cmdName << "'" << endl;
             pCmd->PrintSyntax();
@@ -96,7 +104,18 @@ bool CommandRegistry::ProcessCommands(istream &rStrm) const
             rStrm.ignore(numeric_limits<streamsize>::max(), '\n');
             continue;
         }
-        pCmd->PrintCmd(); // Końcowe wyświetlenie polecenia
+        
+        // Wyświetl polecenie
+        cout << "\n--- Polecenie: ";
+        pCmd->PrintCmd();
+        
+        // Wykonaj polecenie
+        if (!pCmd->ExecCmd(rScene, objName.c_str(), rComChannel))
+        {
+            cerr << "!!! Błąd: Wykonanie polecenia '" << cmdName << "' nie powiodło się." << endl;
+            allSuccess = false;
+        }
+        
         delete pCmd;
     }
 

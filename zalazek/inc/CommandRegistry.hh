@@ -6,6 +6,8 @@
 #include <memory>
 #include "LibInterface.hh"
 #include "AbstractInterp4Command.hh"
+#include "AbstractScene.hh"
+#include "AbstractComChannel.hh"
 
 /*!
  * \file
@@ -66,15 +68,19 @@ public:
     AbstractInterp4Command* CreateCommand(const std::string& sCmdName) const;
     
     /*!
-     * \brief Przetwarza plik poleceń
+     * \brief Przetwarza plik poleceń z wykonaniem
      *
      * Wczytuje i wykonuje polecenia z podanego strumienia.
-     * Dla każdego polecenia wywołuje ReadParams() i PrintParams().
+     * Dla każdego polecenia wywołuje ReadParams(), PrintCmd() i ExecCmd().
      * \param[in] rStrm - strumień zawierający przetworzony plik poleceń
+     * \param[in,out] rScene - scena z obiektami mobilnymi
+     * \param[in,out] rComChannel - kanał komunikacyjny z serwerem
      * \retval true - wszystkie polecenia zostały przetworzone
      * \retval false - wystąpił błąd podczas przetwarzania
      */
-    bool ProcessCommands(std::istream& rStrm) const;
+    bool ProcessCommands(std::istream& rStrm,
+                        AbstractScene& rScene,
+                        AbstractComChannel& rComChannel) const;
 };
 
 #endif
