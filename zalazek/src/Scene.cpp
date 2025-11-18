@@ -4,6 +4,7 @@
 
 using namespace std;
 
+// Wyszukuje obiekt po pełnej kwalifikowanej nazwie
 AbstractMobileObj* Scene::FindMobileObj(const char* sName) {
     if (!sName) return nullptr;
     
@@ -16,6 +17,7 @@ AbstractMobileObj* Scene::FindMobileObj(const char* sName) {
     return nullptr;
 }
 
+// Dodaje obiekt do sceny
 void Scene::AddMobileObj(AbstractMobileObj* pMobObj) {
     if (!pMobObj) {
         cerr << "!!! Błąd: Próba dodania nullptr do sceny!" << endl;
@@ -32,9 +34,10 @@ void Scene::AddMobileObj(AbstractMobileObj* pMobObj) {
     // Dodaj obiekt do mapy (unique_ptr przejmuje własność)
     _objects[name] = unique_ptr<MobileObj>(dynamic_cast<MobileObj*>(pMobObj));
     
-    cout << "  Dodano obiekt do sceny: " << name << endl;
+    cout << "Dodano obiekt do sceny: " << name << endl;
 }
 
+// Wyświetla listę wszystkich obiektów na scenie
 void Scene::PrintObjects() const {
     cout << "\n=== OBIEKTY NA SCENIE ===" << endl;
     cout << "Liczba obiektów: " << _objects.size() << endl;
@@ -42,14 +45,14 @@ void Scene::PrintObjects() const {
     for (const auto& pair : _objects) {
         const MobileObj* obj = pair.second.get();
         cout << "  [" << obj->GetName() << "]" << endl;
-        cout << "    Pozycja: " << obj->GetPositoin_m() << endl;
-        cout << "    Kąty: Roll=" << obj->GetAng_Roll_deg() 
+        cout << "Pozycja: " << obj->GetPositoin_m() << endl;
+        cout << "Kąty: Roll=" << obj->GetAng_Roll_deg() 
              << "Pitch=" << obj->GetAng_Pitch_deg()
              << "Yaw=" << obj->GetAng_Yaw_deg() << "°" << endl;
     }
-    cout << "========================\n" << endl;
 }
 
+// Generuje polecenia UpdateObj dla wszystkich obiektów
 std::string Scene::GenerateUpdateAllCmd() const {
     std::ostringstream oss;
     

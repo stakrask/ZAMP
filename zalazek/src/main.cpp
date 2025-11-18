@@ -16,6 +16,7 @@
 using namespace std;
 using namespace xercesc;
 
+//! \brief Wczytuje konfigurację z pliku XML
 bool ReadXMLConfiguration(const char *sFileName, Configuration &rConfig)
 {
     try
@@ -74,10 +75,10 @@ bool ReadXMLConfiguration(const char *sFileName, Configuration &rConfig)
         char *sSystemId = XMLString::transcode(Exception.getSystemId());
 
         cerr << "!!! Błąd parsowania XML!" << endl
-             << "    Plik:  " << sSystemId << endl
-             << "   Linia: " << Exception.getLineNumber() << endl
-             << " Kolumna: " << Exception.getColumnNumber() << endl
-             << " Informacja: " << sMessage << endl;
+             << "lik:  " << sSystemId << endl
+             << "Linia: " << Exception.getLineNumber() << endl
+             << "Kolumna: " << Exception.getColumnNumber() << endl
+             << "Informacja: " << sMessage << endl;
 
         XMLString::release(&sMessage);
         XMLString::release(&sSystemId);
@@ -122,7 +123,7 @@ int main(int argc, char *argv[])
     CommandRegistry registry;
 
     cout << "Rejestrowanie wtyczek" << endl;
-    for (const auto &libPath : config.GetLibraries())
+    for (const std::string &libPath : config.GetLibraries())
     {
         string fullPath = libPath;
         if (fullPath.find('/') == string::npos)
@@ -132,14 +133,14 @@ int main(int argc, char *argv[])
 
         if (!registry.RegisterCommand(fullPath))
         {
-            cerr << "      Ostrzeżenie: Problem z załadowaniem " << fullPath << endl;
+            cerr << "Ostrzeżenie: Problem z załadowaniem " << fullPath << endl;
         }
         else
         {
-            cout << "      ✓ " << libPath << endl;
+            cout << " " << libPath << endl;
         }
     }
-    cout << "      Wtyczki zarejestrowane." << endl
+    cout << "Wtyczki zarejestrowane." << endl
          << endl;
 
     // Nawiązywanie połączenia z serwerem graficznym
@@ -147,7 +148,6 @@ int main(int argc, char *argv[])
     if (!comChannel.Open("127.0.0.1", 6217))
     {
         cerr << "!!! Błąd: Nie można nawiązać połączenia z serwerem graficznym." << endl;
-        cerr << "    Upewnij się, że serwer działa na porcie 6217." << endl;
         return 1;
     }
     cout << endl;
@@ -155,7 +155,7 @@ int main(int argc, char *argv[])
     // Czyszczenie sceny na serwerze
     if (comChannel.Send("Clear\n") == 0)
     {
-        cout << "      Polecenie Clear wysłane pomyślnie." << endl;
+        cout << "Polecenie Clear wysłane pomyślnie." << endl;
     }
     else
     {
@@ -165,7 +165,7 @@ int main(int argc, char *argv[])
 
     // Dodawanie obiektów do sceny i serwera
     int objectCount = 0;
-    for (const auto &cube : config.GetCubes())
+    for (const CubeParams &cube : config.GetCubes())
     {
         // Utwórz obiekt na podstawie parametrów z konfiguracji
         MobileObj *pObj = new MobileObj(cube);

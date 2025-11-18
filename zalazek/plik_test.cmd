@@ -2,4 +2,8 @@
 
 Move Podstawa SPEED 10
 
-Move Podstawa.Ramie1 SPEED 10
+Begin_Parallel_Actions
+
+Move Podstawa 1 10
+
+End_Parallel_Actions

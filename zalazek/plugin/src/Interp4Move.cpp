@@ -136,7 +136,6 @@ bool Interp4Move::ExecCmd(AbstractScene &rScn,
     std::string updateCmd = oss.str();
 
     // Wyślij polecenie do serwera (thread-safe)
-    rComChann.LockAccess();
     int socket = rComChann.GetSocket();
 
     ssize_t totalSent = 0;
@@ -149,15 +148,12 @@ bool Interp4Move::ExecCmd(AbstractScene &rScn,
       if (sent < 0)
       {
         cerr << "!!! Błąd wysyłania UpdateObj" << endl;
-        rComChann.UnlockAccess();
         return false;
       }
       totalSent += sent;
       toSend -= sent;
       pMessage += sent;
     }
-
-    rComChann.UnlockAccess();
 
     // Postęp (co 10 kroków)
     if ((i + 1) % 10 == 0 || i == numSteps - 1)

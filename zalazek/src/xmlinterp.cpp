@@ -208,16 +208,15 @@ void XMLInterp4Config::fatalError(const xercesc::SAXParseException &rException)
     char *sSystemId = xercesc::XMLString::transcode(rException.getSystemId());
 
     cerr << "!!! Błąd fatalny!" << endl
-         << "    Plik:  " << sSystemId << endl
-         << "   Linia: " << rException.getLineNumber() << endl
-         << " Kolumna: " << rException.getColumnNumber() << endl
-         << " Informacja: " << sMessage
+         << "Plik:  " << sSystemId << endl
+         << "Linia: " << rException.getLineNumber() << endl
+         << "Kolumna: " << rException.getColumnNumber() << endl
+         << "Informacja: " << sMessage
          << endl;
 
     xercesc::XMLString::release(&sMessage);
     xercesc::XMLString::release(&sSystemId);
 }
-
 /*
  * Obsługa błędu
  */
@@ -229,7 +228,6 @@ void XMLInterp4Config::error(const xercesc::SAXParseException &rException)
     
     xercesc::XMLString::release(&sMessage);
 }
-
 /*
  * Obsługa ostrzeżenia
  */

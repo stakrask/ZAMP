@@ -9,10 +9,12 @@
 
 using namespace std;
 
+// Konstruktor
 ComChannel::ComChannel() : _socket(-1)
 {
 }
 
+// Destruktor
 ComChannel::~ComChannel()
 {
     if (_socket >= 0) {
@@ -20,31 +22,37 @@ ComChannel::~ComChannel()
     }
 }
 
+// Inicjalizacja deskryptora gniazda
 void ComChannel::Init(int Socket)
 {
     _socket = Socket;
 }
 
+// Zwraca deskryptor gniazda
 int ComChannel::GetSocket() const
 {
     return _socket;
 }
 
+// Blokuje dostęp do gniazda
 void ComChannel::LockAccess()
 {
     _mutex.lock();
 }
 
+// Odblokowuje dostęp do gniazda
 void ComChannel::UnlockAccess()
 {
     _mutex.unlock();
 }
 
+// Zwraca referencję do mutexa
 std::mutex& ComChannel::UseGuard()
 {
     return _mutex;
 }
 
+// Otwiera połączenie z serwerem graficznym
 bool ComChannel::Open(const char* sServerAddress, int port)
 {
     struct sockaddr_in serverAddr;
@@ -80,6 +88,7 @@ bool ComChannel::Open(const char* sServerAddress, int port)
     return true;
 }
 
+// Wysyła wiadomość do serwera
 int ComChannel::Send(const char* sMessage)
 {
     if (_socket < 0) {
@@ -110,6 +119,7 @@ int ComChannel::Send(const char* sMessage)
     return 0;
 }
 
+// Zamyka połączenie z serwerem
 void ComChannel::Close()
 {
     if (_socket >= 0) {
@@ -127,6 +137,7 @@ void ComChannel::Close()
     }
 }
 
+// Sprawdza czy połączenie jest aktywne
 bool ComChannel::IsOpen() const
 {
     return _socket >= 0;

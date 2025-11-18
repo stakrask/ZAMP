@@ -46,15 +46,26 @@ AbstractInterp4Command *CommandRegistry::CreateCommand(const string &sCmdName) c
 }
 
 // Przetwarzanie pliku poleceń z wykonywaniem ExecCmd
-bool CommandRegistry::ProcessCommands(istream &rStrm, 
-                                     AbstractScene &rScene,
-                                     AbstractComChannel &rComChannel) const
+bool CommandRegistry::ProcessCommands(istream &rStrm,
+                                      AbstractScene &rScene,
+                                      AbstractComChannel &rComChannel) const
 {
     string cmdName;
     bool allSuccess = true;
 
     while (rStrm >> cmdName)
     {
+        if (cmdName == "Begin_Parallel_Actions")
+        {
+            cout << "\n--- Polecenie: Begin_Parallel_Actions (na razie brak wsparcia wielowątkowości)" << endl;
+            continue;
+        }
+
+        if (cmdName == "End_Parallel_Actions")
+        {
+            cout << "--- Polecenie: End_Parallel_Actions (na razie brak wsparcia wielowątkowości)" << endl;
+            continue;
+        }
         // Wyszukanie polecenia w kolekcji
         map<string, shared_ptr<LibInterface>>::const_iterator pIter = _commandMap.find(cmdName);
         if (pIter == _commandMap.end())
@@ -64,7 +75,7 @@ bool CommandRegistry::ProcessCommands(istream &rStrm,
             rStrm.ignore(numeric_limits<streamsize>::max(), '\n');
             continue;
         }
-        
+
         // Utworzenie polecenia
         AbstractInterp4Command *pCmd = pIter->second->CreateCmd();
         if (!pCmd)
@@ -74,7 +85,7 @@ bool CommandRegistry::ProcessCommands(istream &rStrm,
             rStrm.ignore(numeric_limits<streamsize>::max(), '\n');
             continue;
         }
-        
+
         // Wczytaj nazwę obiektu (jeśli nie jest to Pause)
         string objName;
         if (cmdName != "Pause")
@@ -92,7 +103,7 @@ bool CommandRegistry::ProcessCommands(istream &rStrm,
                 continue;
             }
         }
-        
+
         // Wczytanie parametrów polecenia
         if (!pCmd->ReadParams(rStrm))
         {
@@ -104,18 +115,18 @@ bool CommandRegistry::ProcessCommands(istream &rStrm,
             rStrm.ignore(numeric_limits<streamsize>::max(), '\n');
             continue;
         }
-        
+
         // Wyświetl polecenie
         cout << "\n--- Polecenie: ";
         pCmd->PrintCmd();
-        
+
         // Wykonaj polecenie
         if (!pCmd->ExecCmd(rScene, objName.c_str(), rComChannel))
         {
             cerr << "!!! Błąd: Wykonanie polecenia '" << cmdName << "' nie powiodło się." << endl;
             allSuccess = false;
         }
-        
+
         delete pCmd;
     }
 

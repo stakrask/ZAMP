@@ -4,9 +4,10 @@
 
 using namespace std;
 
+// Wyświetla podsumowanie konfiguracji
 void Configuration::PrintSummary() const
 {
-    cout << "\nPODSUMOWANIE KONFIG" << endl;
+    cout << "\nPODSUMOWANIE KONFIG:" << endl;
 
     cout << "\nWtyczki (" << _libraries.size() << "):" << endl;
     for (const auto &lib : _libraries)
@@ -18,15 +19,16 @@ void Configuration::PrintSummary() const
     for (const auto &cube : _cubes)
     {
         cout << "  [" << cube.name << "]" << endl;
-        cout << "    Shift:      " << cube.shift << endl;
-        cout << "    Scale:      " << cube.scale << endl;
-        cout << "    RotXYZ_deg: " << cube.rotXYZ_deg << endl;
-        cout << "    Trans_m:    " << cube.trans_m << endl;
-        cout << "    RGB:        " << cube.rgb << endl;
+        cout << "Shift:      " << cube.shift << endl;
+        cout << "Scale:      " << cube.scale << endl;
+        cout << "RotXYZ_deg: " << cube.rotXYZ_deg << endl;
+        cout << "Trans_m:    " << cube.trans_m << endl;
+        cout << "RGB:        " << cube.rgb << endl;
     }
     cout << endl;
 }
 
+// Generuje polecenie AddObj na podstawie parametrów Cube
 std::string Configuration::GenerateAddObjCommand(const CubeParams &cube)
 {
     std::ostringstream oss;
