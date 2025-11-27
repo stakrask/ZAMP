@@ -2,8 +2,8 @@
 
 Move Podstawa SPEED 10
 
-Begin_Parallel_Actions
+Rotate Podstawa OY 60 90
 
 Move Podstawa 1 10
 
-End_Parallel_Actions
+Set Podstawa 5 0 0 0 0 90
