@@ -16,6 +16,19 @@
 using namespace std;
 using namespace xercesc;
 
+//! \brief Wyświetla informacje o użyciu programu
+void PrintUsage(const char *programName)
+{
+    cerr << "Użycie: " << programName << " <plik_konfiguracji.xml> <plik_poleceń.cmd>" << endl;
+    cerr << endl;
+    cerr << "Argumenty:" << endl;
+    cerr << "  <plik_konfiguracji.xml> - ścieżka do pliku konfiguracji sceny (wymagany)" << endl;
+    cerr << "  <plik_poleceń.cmd>      - ścieżka do pliku z poleceniami (wymagany)" << endl;
+    cerr << endl;
+    cerr << "Przykład:" << endl;
+    cerr << "  " << programName << " config/config.xml plik_test.cmd" << endl;
+}
+
 //! \brief Wczytuje początkową konfigurację z pliku XML
 bool ReadXMLConfiguration(const char *sFileName, Configuration &rConfig)
 {
@@ -104,10 +117,19 @@ bool ReadXMLConfiguration(const char *sFileName, Configuration &rConfig)
 
 int main(int argc, char *argv[])
 {
+    // Sprawdzenie liczby argumentów
+    if (argc != 3)
+    {
+        cerr << "!!! Błąd: Niewystarczająca liczba argumentów." << endl;
+        PrintUsage(argv[0]);
+        return 1;
+    }
+
+    const string configFile = argv[1];
+    const string inputFile = argv[2];
 
     // Wczytywanie konfiguracji z pliku XML
     Configuration config;
-    const string configFile = "config/config.xml";
 
     cout << "Wczytywanie konfiguracji z pliku: " << configFile << endl;
     if (!ReadXMLConfiguration(configFile.c_str(), config))
@@ -194,7 +216,7 @@ int main(int argc, char *argv[])
     scene.PrintObjects();
 
     // Przetwarzanie pliku poleceń
-    const string inputFile = "plik_test.cmd";
+    cout << "Przetwarzanie pliku poleceń: " << inputFile << endl;
     const string preprocessedOutput = RunPreprocessor(inputFile.c_str());
 
     if (preprocessedOutput.empty())
