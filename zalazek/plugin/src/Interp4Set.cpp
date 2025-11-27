@@ -1,4 +1,7 @@
 #include <iostream>
+#include <sstream>
+#include <iomanip>
+#include <unistd.h>
 #include "Interp4Set.hh"
 
 using std::cout;
@@ -53,16 +56,59 @@ const char* Interp4Set::GetCmdName() const
 }
 
 /*!
- * \brief Wykonuje polecenie Set
+ * \brief Wykonuje polecenie Set - ustawia pozycję i orientację obiektu
+ * 
+ * \param[in,out] rScn - scena z obiektami mobilnymi
+ * \param[in] sMobObjName - nazwa obiektu do ustawienia
+ * \param[in,out] rComChann - kanał komunikacyjny z serwerem graficznym
+ * \return true jeśli operacja powiodła się
  */
 bool Interp4Set::ExecCmd( AbstractScene      &rScn, 
-                          const char         *sMobObjName,
-                          AbstractComChannel &rComChann )
+  const char         *sMobObjName,
+  AbstractComChannel &rComChann )
 {
-  // TODO: Implementacja wykonania polecenia w kolejnych etapach
-  cout << "Wykonywanie polecenia Set dla obiektu: " << sMobObjName << endl;
-  PrintParams();
-  return true;
+// Znajdź obiekt na scenie
+AbstractMobileObj* pObj = rScn.FindMobileObj(sMobObjName);
+
+if (!pObj) {
+cerr << "!!! Błąd: Nie znaleziono obiektu '" << sMobObjName << "'" << endl;
+return false;
+}
+
+cout << "Set: " << sMobObjName 
+<< " pos=(" << _Pos_X << "," << _Pos_Y << "," << _Pos_Z << ") m, "
+<< "rot=(" << _Angle_OX_deg << "," << _Angle_OY_deg << "," << _Angle_OZ_deg << ")°" 
+<< endl;
+
+// Przygotuj nową pozycję
+Vector3D new_position;
+new_position[0] = _Pos_X;
+new_position[1] = _Pos_Y;
+new_position[2] = _Pos_Z;
+
+// Ustaw nową pozycję
+pObj->SetPosition_m(new_position);
+
+// Ustaw nową orientację (kąty Roll-Pitch-Yaw)
+pObj->SetAng_Roll_deg(_Angle_OX_deg);   // Obrót wokół OX
+pObj->SetAng_Pitch_deg(_Angle_OY_deg);  // Obrót wokół OY
+pObj->SetAng_Yaw_deg(_Angle_OZ_deg);    // Obrót wokół OZ
+
+// Przygotuj polecenie UpdateObj dla serwera graficznego
+std::ostringstream cmd;
+cmd << std::fixed << std::setprecision(2);
+cmd << "UpdateObj Name=" << sMobObjName;
+cmd << " RotXYZ_deg=(" << _Angle_OX_deg << "," 
+<< _Angle_OY_deg << "," << _Angle_OZ_deg << ")";
+cmd << " Trans_m=(" << _Pos_X << "," << _Pos_Y << "," << _Pos_Z << ")";
+cmd << "\n";
+
+// Wyślij polecenie do serwera
+int socket = rComChann.GetSocket();
+write(socket, cmd.str().c_str(), cmd.str().length());
+
+cout << "  Set zakończony." << endl;
+return true;
 }
 
 /*!

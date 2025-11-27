@@ -1,4 +1,5 @@
 #include <iostream>
+#include <unistd.h>
 #include "Interp4Pause.hh"
 
 using std::cout;
@@ -49,16 +50,28 @@ const char* Interp4Pause::GetCmdName() const
 }
 
 /*!
- * \brief Wykonuje polecenie Pause
+ * \brief Wykonuje polecenie Pause - wstrzymuje wykonanie na zadany czas
+ * 
+ * \param[in,out] rScn - scena z obiektami mobilnymi (nieużywana)
+ * \param[in] sMobObjName - nazwa obiektu (nieużywana dla Pause)
+ * \param[in,out] rComChann - kanał komunikacyjny (nieużywany)
+ * \return true - operacja zawsze się powodzi
  */
 bool Interp4Pause::ExecCmd( AbstractScene      &rScn, 
-                            const char         *sMobObjName,
-                            AbstractComChannel &rComChann )
+  const char         *sMobObjName,
+  AbstractComChannel &rComChann )
 {
-  // TODO: Implementacja wykonania polecenia w kolejnych etapach
-  cout << "Wykonywanie polecenia Pause dla obiektu: " << sMobObjName << endl;
-  PrintParams();
-  return true;
+cout << "Pause: " << _Time_ms << " ms (" << (_Time_ms / 1000.0) << " s)" << endl;
+
+// Konwersja milisekund na mikrosekundy (usleep przyjmuje mikrosekundy)
+// 1 ms = 1000 µs
+useconds_t microseconds = (useconds_t)(_Time_ms * 1000);
+
+// Wstrzymanie wykonania
+usleep(microseconds);
+
+cout << "  Pause zakończony." << endl;
+return true;
 }
 
 /*!
