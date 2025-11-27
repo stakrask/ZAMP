@@ -25,7 +25,7 @@ class Interp4Move: public AbstractInterp4Command {
   /*
    * Pola przechowujące wartości parametrów polecenia
    */
-  double  _Speed_mmS;
+  double  _Speed_mS;
   double  _Distance_m;
   
  public:

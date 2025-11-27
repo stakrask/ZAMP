@@ -4,7 +4,7 @@
 
 using namespace std;
 
-// Wyświetla podsumowanie konfiguracji
+// Wyświetla podsumowanie konfiguracji zawartej w pliku XML
 void Configuration::PrintSummary() const
 {
     cout << "\nPODSUMOWANIE KONFIG:" << endl;

@@ -26,7 +26,7 @@ AbstractInterp4Command *CreateCmd(void)
 /*!
  * \brief Konstruktor - inicjalizuje parametry zerami
  */
-Interp4Move::Interp4Move() : _Speed_mmS(0), _Distance_m(0)
+Interp4Move::Interp4Move() : _Speed_mS(0), _Distance_m(0)
 {
 }
 
@@ -35,7 +35,7 @@ Interp4Move::Interp4Move() : _Speed_mmS(0), _Distance_m(0)
  */
 void Interp4Move::PrintCmd() const
 {
-  cout << GetCmdName() << " " << _Speed_mmS << " m/s " << _Distance_m << " m" << endl;
+  cout << GetCmdName() << " " << _Speed_mS << " m/s " << _Distance_m << " m" << endl;
 }
 
 /*!
@@ -43,7 +43,7 @@ void Interp4Move::PrintCmd() const
  */
 void Interp4Move::PrintParams() const
 {
-  cout << "  Prędkość: " << _Speed_mmS << " m/s" << endl;
+  cout << "  Prędkość: " << _Speed_mS << " m/s" << endl;
   cout << "  Odległość: " << _Distance_m << " m" << endl;
 }
 
@@ -55,121 +55,60 @@ const char *Interp4Move::GetCmdName() const
   return ::GetCmdName();
 }
 
-/*!
- * \brief Wykonuje polecenie Move z animacją
- *
- * ALGORYTM:
- * 1. Znajdź obiekt na scenie
- * 2. Oblicz parametry animacji (liczba kroków, delta na krok)
- * 3. Oblicz kierunek ruchu (wzdłuż lokalnej osi OX obiektu)
- * 4. W pętli:
- *    - Zaktualizuj pozycję obiektu
- *    - Wyślij UpdateObj do serwera
- *    - Odczekaj czas kroku
- *
- * \param[in,out] rScn - scena zawierająca obiekty mobilne
+/*! \brief Wykonuje polecenie Move
+ * \param[in,out] rScn - scena z obiektami mobilnymi
  * \param[in] sMobObjName - nazwa obiektu do przesunięcia
- * \param[in,out] rComChann - kanał komunikacyjny z serwerem
- * \return true jeśli sukces, false w przypadku błędu
+ * \param[in,out] rComChann - kanał komunikacyjny z serwerem graficznym
+ * \return true jeśli operacja powiodła się
  */
 bool Interp4Move::ExecCmd(AbstractScene &rScn,
                           const char *sMobObjName,
                           AbstractComChannel &rComChann)
 {
-  
+  // Znajdź obiekt na scenie
   AbstractMobileObj *pObj = rScn.FindMobileObj(sMobObjName);
-
   if (!pObj)
   {
     cerr << "!!! Błąd: Nie znaleziono obiektu '" << sMobObjName << "'" << endl;
     return false;
   }
 
-  cout << "\n=== Wykonywanie Move dla: " << sMobObjName << " ===" << endl;
-  cout << "Prędkość: " << _Speed_mmS << " m/s, Odległość: " << _Distance_m << " m" << endl;
+  cout << "Move: " << sMobObjName << " speed=" << _Speed_mS
+       << " m/s distance=" << _Distance_m << " m" << endl;
 
-  const double FRAME_TIME = 0.04; // 40ms = 25 FPS
+  // pblicz liczbę kroków
+  const double STEP_TIME = 0.05;                // 50ms między krokami
+  double total_time = _Distance_m / _Speed_mS; // czas całej trasy [s]
+  int num_steps = (int)(total_time / STEP_TIME);
+  if (num_steps < 1) // co najmniej jeden krok
+    num_steps = 1;
 
-  // Oblicz całkowity czas trwania ruchu
-  double totalTime_s = fabs(_Distance_m / _Speed_mmS);
+  double step_distance = _Distance_m / num_steps; // droga na jeden krok
 
-  // Oblicz liczbę kroków (klatek animacji)
-  int numSteps = (int)(totalTime_s / FRAME_TIME);
-  if (numSteps < 1)
-    numSteps = 1; // Przynajmniej 1 krok
+  // pętla animacji
+  Vector3D current_pos = pObj->GetPositoin_m();
 
-  // Oblicz przesunięcie na jeden krok
-  double stepDistance = _Distance_m / numSteps;
-
-  cout << "Animacja: " << numSteps << " kroków, "
-       << (FRAME_TIME * 1000) << " ms na krok" << endl;
-
-  double yawAngle_rad = pObj->GetAng_Yaw_deg() * M_PI / 180.0;
-
-  // Wektor kierunku: lokalny OX po obrocie o Yaw
-  Vector3D direction;
-  direction[0] = cos(yawAngle_rad); // składowa X
-  direction[1] = sin(yawAngle_rad); // składowa Y
-  direction[2] = 0;                 // składowa Z (ruch w płaszczyźnie XY)
-
-  // Wektor przesunięcia na jeden krok
-  Vector3D stepVector = direction * stepDistance;
-  Vector3D startPos = pObj->GetPositoin_m();
-  cout << "Pozycja początkowa: " << startPos << endl;
-
-  for (int i = 0; i < numSteps; ++i)
+  for (int i = 0; i < num_steps; i++)
   {
-    // Zaktualizuj pozycję obiektu
-    Vector3D currentPos = pObj->GetPositoin_m();
-    Vector3D newPos = currentPos + stepVector;
-    pObj->SetPosition_m(newPos);
+    // zaktualizuj pozycję
+    current_pos[0] += step_distance;
+    pObj->SetPosition_m(current_pos);
 
-    std::ostringstream oss;
-    oss << std::fixed << std::setprecision(3);
+    // wyślij UpdateObj do serwera
+    std::ostringstream cmd;
+    cmd << std::fixed << std::setprecision(2);
+    cmd << "UpdateObj Name=" << sMobObjName;
+    cmd << " Trans_m=(" << current_pos[0] << ","
+        << current_pos[1] << "," << current_pos[2] << ")\n";
 
-    oss << "UpdateObj Name=" << sMobObjName;
-    oss << " RotXYZ_deg=(" << pObj->GetAng_Roll_deg() << ","
-        << pObj->GetAng_Pitch_deg() << "," << pObj->GetAng_Yaw_deg() << ")";
-    oss << " Trans_m=(" << newPos[0] << "," << newPos[1] << "," << newPos[2] << ")";
-    oss << "\n";
-
-    std::string updateCmd = oss.str();
-
-    // Wyślij polecenie do serwera (thread-safe)
     int socket = rComChann.GetSocket();
+    write(socket, cmd.str().c_str(), cmd.str().length());
 
-    ssize_t totalSent = 0;
-    ssize_t toSend = updateCmd.length();
-    const char *pMessage = updateCmd.c_str();
-
-    while (toSend > 0)
-    {
-      ssize_t sent = write(socket, pMessage, toSend);
-      if (sent < 0)
-      {
-        cerr << "!!! Błąd wysyłania UpdateObj" << endl;
-        return false;
-      }
-      totalSent += sent;
-      toSend -= sent;
-      pMessage += sent;
-    }
-
-    // Postęp (co 10 kroków)
-    if ((i + 1) % 10 == 0 || i == numSteps - 1)
-    {
-      double progress = ((double)(i + 1) / numSteps) * 100.0;
-      cout << "  Postęp: " << (int)progress << "% (krok "
-           << (i + 1) << "/" << numSteps << ")" << endl;
-    }
-
-    // Odczekaj czas klatki (40ms = 40000 mikrosekund)
-    usleep((int)(FRAME_TIME * 1000000));
+    // czekaj przed następnym krokiem
+    usleep((int)(STEP_TIME * 1000000));
   }
 
-  Vector3D finalPos = pObj->GetPositoin_m();
-  cout << "Pozycja końcowa: " << finalPos << endl;
-
+  cout << "  Move zakończony." << endl;
   return true;
 }
 
@@ -215,7 +154,7 @@ bool Interp4Move::ReadParams(std::istream &Strm_CmdsList)
     return false;
   }
 
-  _Speed_mmS = speed;
+  _Speed_mS = speed;
   _Distance_m = distance;
 
   return true;

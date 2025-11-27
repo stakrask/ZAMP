@@ -16,7 +16,7 @@
 using namespace std;
 using namespace xercesc;
 
-//! \brief Wczytuje konfigurację z pliku XML
+//! \brief Wczytuje początkową konfigurację z pliku XML
 bool ReadXMLConfiguration(const char *sFileName, Configuration &rConfig)
 {
     try
@@ -105,7 +105,7 @@ bool ReadXMLConfiguration(const char *sFileName, Configuration &rConfig)
 int main(int argc, char *argv[])
 {
 
-    // Konfiguracja z pliku XML
+    // Wczytywanie konfiguracji z pliku XML
     Configuration config;
     const string configFile = "config/config.xml";
 
@@ -116,7 +116,7 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    // Tworzenie sceny
+    // Tworzenie sceny, czyli zbioru obiektów mobilnych
     Scene scene;
 
     // Zarejestrowanie wtyczek
@@ -143,7 +143,7 @@ int main(int argc, char *argv[])
     cout << "Wtyczki zarejestrowane." << endl
          << endl;
 
-    // Nawiązywanie połączenia z serwerem graficznym
+    // Nawiązywanie połączenia z serwerem graficznym, PORT 6217
     ComChannel comChannel;
     if (!comChannel.Open("127.0.0.1", 6217))
     {
@@ -152,7 +152,7 @@ int main(int argc, char *argv[])
     }
     cout << endl;
 
-    // Czyszczenie sceny na serwerze
+    // Czyszczenie sceny na serwerze graficznym, by uniknąć duplikatów
     if (comChannel.Send("Clear\n") == 0)
     {
         cout << "Polecenie Clear wysłane pomyślnie." << endl;
