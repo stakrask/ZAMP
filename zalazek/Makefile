@@ -19,6 +19,7 @@ SOURCES = $(SRC_DIR)/main.cpp \
           $(SRC_DIR)/Configuration.cpp \
           $(SRC_DIR)/xmlinterp.cpp \
           $(SRC_DIR)/ComChannel.cpp \
+          $(SRC_DIR)/Sender.cpp \
           $(SRC_DIR)/Scene.cpp \
           $(SRC_DIR)/MobileObj.cpp
 
@@ -68,7 +69,7 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
 $(OBJ_DIR)/main.o: $(SRC_DIR)/main.cpp $(INC_DIR)/Preprocessor.hh \
                    $(INC_DIR)/CommandRegistry.hh $(INC_DIR)/Configuration.hh \
                    $(INC_DIR)/xmlinterp.hh $(INC_DIR)/ComChannel.hh \
-                   $(INC_DIR)/Scene.hh $(INC_DIR)/MobileObj.hh
+                   $(INC_DIR)/Sender.hh $(INC_DIR)/Scene.hh $(INC_DIR)/MobileObj.hh
 
 $(OBJ_DIR)/CommandRegistry.o: $(SRC_DIR)/CommandRegistry.cpp \
                                $(INC_DIR)/CommandRegistry.hh \
@@ -89,12 +90,16 @@ $(OBJ_DIR)/xmlinterp.o: $(SRC_DIR)/xmlinterp.cpp \
                        $(INC_DIR)/xmlinterp.hh \
                        $(INC_DIR)/Configuration.hh
 
-$(OBJ_DIR)/Connection.o: $(SRC_DIR)/Connection.cpp \
-                         $(INC_DIR)/Connection.hh
-
 $(OBJ_DIR)/ComChannel.o: $(SRC_DIR)/ComChannel.cpp \
                          $(INC_DIR)/ComChannel.hh \
                          $(INC_DIR)/AbstractComChannel.hh
+	@echo "Kompilacja: $<"
+	$(CXX) $(CXXFLAGS) -c $< -o $@
+
+$(OBJ_DIR)/Sender.o: $(SRC_DIR)/Sender.cpp \
+                     $(INC_DIR)/Sender.hh \
+                     $(INC_DIR)/AbstractComChannel.hh \
+                     $(INC_DIR)/AbstractScene.hh
 	@echo "Kompilacja: $<"
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
