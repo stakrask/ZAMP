@@ -4,6 +4,8 @@
 #include <map>
 #include <string>
 #include <memory>
+#include <vector>
+#include <thread>
 #include "LibInterface.hh"
 #include "AbstractInterp4Command.hh"
 #include "AbstractScene.hh"
@@ -18,11 +20,21 @@
  */
 
 /*!
+ * \brief Struktura przechowująca informacje o pojedynczym poleceniu do wykonania
+ */
+struct CommandTask {
+    std::string cmdName;        ///< Nazwa polecenia (np. "Move", "Rotate")
+    std::string objectName;     ///< Nazwa obiektu (jeśli wymagana)
+    std::string paramsLine;     ///< Linia z parametrami polecenia
+};
+
+/*!
  * \brief Rejestr poleceń łączący nazwy z wtyczkami
  *
  * Klasa zarządza mapowaniem nazw poleceń na odpowiadające
  * im wtyczki. Umożliwia dynamiczne tworzenie obiektów poleceń
  * na podstawie nazwy oraz wykonywanie poleceń z pliku.
+ * Obsługuje również wielowątkowe wykonywanie poleceń.
  */
 class CommandRegistry {
 private:
@@ -30,6 +42,18 @@ private:
      * \brief Mapa łącząca nazwy poleceń z interfejsami bibliotek
      */
     std::map<std::string, std::shared_ptr<LibInterface>> _commandMap;
+
+    /*!
+     * \brief Funkcja wykonywana przez wątek roboczy
+     * 
+     * Wykonuje pojedyncze polecenie w osobnym wątku.
+     * \param[in] task - zadanie do wykonania (polecenie + parametry)
+     * \param[in,out] rScene - scena z obiektami mobilnymi
+     * \param[in,out] rComChannel - kanał komunikacyjny z serwerem
+     */
+    void ExecuteCommandInThread(const CommandTask& task,
+                               AbstractScene& rScene,
+                               AbstractComChannel& rComChannel) const;
 
 public:
     /*!
@@ -71,7 +95,8 @@ public:
      * \brief Przetwarza plik poleceń z wykonaniem
      *
      * Wczytuje i wykonuje polecenia z podanego strumienia.
-     * Dla każdego polecenia wywołuje ReadParams(), PrintCmd() i ExecCmd().
+     * Obsługuje sekcje Begin_Parallel_Actions / End_Parallel_Actions
+     * dla wielowątkowego wykonywania poleceń.
      * \param[in] rStrm - strumień zawierający przetworzony plik poleceń
      * \param[in,out] rScene - scena z obiektami mobilnymi
      * \param[in,out] rComChannel - kanał komunikacyjny z serwerem

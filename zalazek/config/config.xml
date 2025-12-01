@@ -1,27 +1,27 @@
 <Config>
   <Plugins>
-    <Lib Name="libInterp4Move.so"/>
-    <Lib Name="libInterp4Rotate.so"/>
-    <Lib Name="libInterp4Pause.so"/>
-    <Lib Name="libInterp4Set.so"/>
+     <Lib Name="libInterp4Move.so"/>
+     <Lib Name="libInterp4Rotate.so"/>
+     <Lib Name="libInterp4Pause.so"/>
+     <Lib Name="libInterp4Set.so"/>
   </Plugins>
-  
   <Objects>
-    <Cube Name="Podstawa" 
-          Scale="2 2 0.5" 
-          Trans_m="0 0 0" 
-          RGB="000 000 255"/>
-          
-    <Cube Name="Podstawa.Ramie1" 
-          Shift="0 0 -0.25"
-          Scale="0.3 0.3 1.5" 
-          Trans_m="0 0 1" 
-          RGB="255 000 000"/>
-          
-    <Cube Name="Podstawa.Ramie1.Ramie2" 
-          Shift="0 0 -0.75"
-          Scale="0.2 0.2 1.5" 
-          Trans_m="0 0 2" 
-          RGB="000 255 000"/>
+    <Cube Name="Karuzela" Shift="0 0 0" Scale="3.0 3.0 0.5" Trans_m="0 0 0" RGB="80 80 120"/>
+    
+    <Cube Name="Karuzela.Slup" Shift="0 0 0.5" Scale="0.6 0.6 4.0" Trans_m="0 0 0" RGB="150 150 150"/>
+    
+    <Cube Name="Karuzela.Wirnik" Shift="0 0 0" Scale="0.8 0.8 0.8" Trans_m="0 0 4.0" RGB="200 200 200"/>
+    
+    <Cube Name="Karuzela.Wirnik.Ramie1" Shift="0 0 0" Scale="0.3 2.5 0.3" Trans_m="0 0 0" RotXYZ_deg="0 0 0" RGB="180 180 180"/>
+    <Cube Name="Karuzela.Wirnik.Ramie1.Gondola" Shift="0 0 0" Scale="1.2 1.2 1.5" Trans_m="0 2.5 0" RGB="220 50 50"/>
+    
+    <Cube Name="Karuzela.Wirnik.Ramie2" Shift="0 0 0" Scale="0.3 2.5 0.3" Trans_m="0 0 0" RotXYZ_deg="0 0 90" RGB="180 180 180"/>
+    <Cube Name="Karuzela.Wirnik.Ramie2.Gondola" Shift="0 0 0" Scale="1.2 1.2 1.5" Trans_m="0 2.5 0" RGB="50 220 50"/>
+    
+    <Cube Name="Karuzela.Wirnik.Ramie3" Shift="0 0 0" Scale="0.3 2.5 0.3" Trans_m="0 0 0" RotXYZ_deg="0 0 180" RGB="180 180 180"/>
+    <Cube Name="Karuzela.Wirnik.Ramie3.Gondola" Shift="0 0 0" Scale="1.2 1.2 1.5" Trans_m="0 2.5 0" RGB="50 50 220"/>
+    
+    <Cube Name="Karuzela.Wirnik.Ramie4" Shift="0 0 0" Scale="0.3 2.5 0.3" Trans_m="0 0 0" RotXYZ_deg="0 0 270" RGB="180 180 180"/>
+    <Cube Name="Karuzela.Wirnik.Ramie4.Gondola" Shift="0 0 0" Scale="1.2 1.2 1.5" Trans_m="0 2.5 0" RGB="220 220 50"/>
   </Objects>
 </Config>
