@@ -6,12 +6,17 @@
 #include <map>
 #include <string>
 #include <memory>
+#include <mutex>
 
 /*!
- * \brief Klasa reprezentująca scenę 3D z obiektami mobilnymi
+ * \brief Klasa reprezentująca scenę 3D z obiektami mobilnymi (THREAD-SAFE)
  * 
  * Scena przechowuje kolekcję obiektów mobilnych i umożliwia
  * ich wyszukiwanie po pełnej kwalifikowanej nazwie.
+ * 
+ * - Dostęp do mapy _objects jest chroniony mutexem _sceneMutex
+ * - Każdy obiekt MobileObj ma dodatkowo swój własny mutex
+ * - Dzięki temu można bezpiecznie modyfikować różne obiekty równolegle
  */
 class Scene : public AbstractScene {
 private:
@@ -23,6 +28,13 @@ private:
      */
     std::map<std::string, std::unique_ptr<MobileObj>> _objects;
     
+    /*!
+     * \brief Mutex chroniący dostęp do mapy obiektów
+     * 
+     * Chroni operacje takie jak FindMobileObj, AddMobileObj, iteracje po mapie.
+     */
+    mutable std::mutex _sceneMutex;
+    
 public:
     /*!
      * \brief Konstruktor domyślny
@@ -33,8 +45,6 @@ public:
      * \brief Destruktor - automatycznie usuwa wszystkie obiekty
      */
     virtual ~Scene() = default;
-    
-    // ===== Implementacja interfejsu AbstractScene =====
     
     /*!
      * \brief Wyszukuje obiekt po pełnej kwalifikowanej nazwie
@@ -52,12 +62,13 @@ public:
      */
     virtual void AddMobileObj(AbstractMobileObj* pMobObj) override;
     
-    // ===== Metody dodatkowe =====
-    
     /*!
      * \brief Zwraca liczbę obiektów na scenie
      */
-    size_t GetObjectCount() const { return _objects.size(); }
+    size_t GetObjectCount() const {
+        std::lock_guard<std::mutex> lock(_sceneMutex);
+        return _objects.size();
+    }
     
     /*!
      * \brief Wyświetla listę wszystkich obiektów na scenie

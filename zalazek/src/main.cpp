@@ -10,7 +10,6 @@
 #include "Configuration.hh"
 #include "xmlinterp.hh"
 #include "ComChannel.hh"
-#include "Sender.hh"
 #include "Scene.hh"
 #include "MobileObj.hh"
 
@@ -165,12 +164,11 @@ int main(int argc, char *argv[])
     }
     cout << "Wtyczki zarejestrowane." << endl << endl;
 
-    // Utworzenie kanału komunikacyjnego i sendera
+    // Utworzenie kanału komunikacyjnego (zamiast Sender)
     ComChannel comChannel;
-    Sender sender(&comChannel, &scene);
 
     // Nawiązywanie połączenia z serwerem graficznym, PORT 6217
-    if (!sender.OpenConnection("127.0.0.1", 6217))
+    if (!comChannel.OpenConnection("127.0.0.1", 6217))
     {
         cerr << "!!! Błąd: Nie można nawiązać połączenia z serwerem graficznym." << endl;
         return 1;
@@ -178,7 +176,7 @@ int main(int argc, char *argv[])
     cout << endl;
 
     // Czyszczenie sceny na serwerze graficznym
-    if (sender.SendClear())
+    if (comChannel.SendClear())
     {
         cout << "Polecenie Clear wysłane pomyślnie." << endl;
     }
@@ -202,7 +200,7 @@ int main(int argc, char *argv[])
         string cmd = Configuration::GenerateAddObjCommand(cube);
 
         // Wyślij polecenie do serwera
-        if (sender.SendAddObj(cmd))
+        if (comChannel.SendAddObj(cmd))
         {
             cout << "Powodzenie: " << cube.name << endl;
             objectCount++;
@@ -224,7 +222,7 @@ int main(int argc, char *argv[])
     if (preprocessedOutput.empty())
     {
         cerr << "!!! Błąd: Nie udało się przetworzyć pliku przez preprocesor." << endl;
-        sender.CloseConnection();
+        comChannel.CloseConnection();
         return 1;
     }
 
@@ -237,8 +235,8 @@ int main(int argc, char *argv[])
 
     cout << endl;
 
-    // Zamykanie połączenia z serwerem (automatyczne przez destruktor Sender)
-    sender.CloseConnection();
+    // Zamykanie połączenia z serwerem (automatyczne przez destruktor ComChannel)
+    comChannel.CloseConnection();
     
     return 0;
 }

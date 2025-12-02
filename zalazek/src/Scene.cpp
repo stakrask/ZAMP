@@ -8,6 +8,9 @@ using namespace std;
 AbstractMobileObj* Scene::FindMobileObj(const char* sName) {
     if (!sName) return nullptr;
     
+    // Lock mutex dla dostępu do mapy
+    lock_guard<mutex> lock(_sceneMutex);
+    
     auto it = _objects.find(sName);
     
     if (it != _objects.end()) {
@@ -26,6 +29,9 @@ void Scene::AddMobileObj(AbstractMobileObj* pMobObj) {
     
     string name = pMobObj->GetName();
     
+    // Lock mutex dla modyfikacji mapy
+    lock_guard<mutex> lock(_sceneMutex);
+    
     // Sprawdź czy obiekt o tej nazwie już istnieje
     if (_objects.find(name) != _objects.end()) {
         cerr << "!!! Ostrzeżenie: Obiekt '" << name << "' już istnieje. Zastępuję." << endl;
@@ -39,21 +45,28 @@ void Scene::AddMobileObj(AbstractMobileObj* pMobObj) {
 
 // Wyświetla listę wszystkich obiektów na scenie
 void Scene::PrintObjects() const {
+    // Lock mutex dla iteracji po mapie
+    lock_guard<mutex> lock(_sceneMutex);
+    
     cout << "\n=== OBIEKTY NA SCENIE ===" << endl;
     cout << "Liczba obiektów: " << _objects.size() << endl;
     
     for (const auto& pair : _objects) {
         const MobileObj* obj = pair.second.get();
+        // GetName(), GetPositoin_m(), GetAng_*() są już thread-safe w MobileObj
         cout << "  [" << obj->GetName() << "]" << endl;
-        cout << "Pozycja: " << obj->GetPositoin_m() << endl;
-        cout << "Kąty: Roll=" << obj->GetAng_Roll_deg() 
-             << "Pitch=" << obj->GetAng_Pitch_deg()
-             << "Yaw=" << obj->GetAng_Yaw_deg() << "°" << endl;
+        cout << "    Pozycja: " << obj->GetPositoin_m() << endl;
+        cout << "    Kąty: Roll=" << obj->GetAng_Roll_deg() 
+             << "° Pitch=" << obj->GetAng_Pitch_deg()
+             << "° Yaw=" << obj->GetAng_Yaw_deg() << "°" << endl;
     }
 }
 
 // Generuje polecenia UpdateObj dla wszystkich obiektów
 std::string Scene::GenerateUpdateAllCmd() const {
+    // Lock mutex dla iteracji po mapie
+    lock_guard<mutex> lock(_sceneMutex);
+    
     std::ostringstream oss;
     
     for (const auto& pair : _objects) {

@@ -4,21 +4,23 @@
 #include "AbstractComChannel.hh"
 #include <mutex>
 #include <unistd.h>
-#include <cstring>
+#include <string>
 
 /*!
  * \file
  * \brief Implementacja kanału komunikacyjnego z serwerem graficznym
  *
- * Klasa implementuje interfejs AbstractComChannel i zapewnia
- * bezpieczną komunikację z serwerem w środowisku wielowątkowym.
+ * Klasa implementuje pełną komunikację z serwerem graficznym,
+ * łącznie z nawiązywaniem połączenia, wysyłaniem poleceń i zamykaniem.
  */
 
 /*!
- * \brief Implementacja kanału komunikacyjnego
+ * \brief Pełna implementacja kanału komunikacyjnego z serwerem
  *
- * Klasa zarządza połączeniem TCP z serwerem graficznym
- * i zapewnia synchronizację dostępu w środowisku wielowątkowym.
+ * Klasa zarządza:
+ * - Nawiązywaniem połączenia TCP
+ * - Wysyłaniem poleceń (thread-safe)
+ * - Zamykaniem połączenia
  */
 class ComChannel : public AbstractComChannel
 {
@@ -29,15 +31,11 @@ private:
 public:
     /*!
      * \brief Konstruktor domyślny
-     *
-     * Inicjalizuje kanał z nieprawidłowym deskryptorem gniazda.
      */
     ComChannel();
 
     /*!
-     * \brief Destruktor
-     *
-     * Zamyka połączenie jeśli jest otwarte.
+     * \brief Destruktor - automatycznie zamyka połączenie
      */
     virtual ~ComChannel();
 
@@ -45,43 +43,62 @@ public:
     ComChannel(const ComChannel &) = delete;
     ComChannel &operator=(const ComChannel &) = delete;
 
-    /*!
-     * \brief Inicjalizuje deskryptor gniazda
-     *
-     * \param[in] Socket - poprawny deskryptor gniazda
-     */
+    // ===== Implementacja interfejsu AbstractComChannel =====
+    
     virtual void Init(int Socket) override;
-
-    /*!
-     * \brief Zwraca deskryptor gniazda
-     *
-     * \return Deskryptor gniazda lub -1 jeśli nie zainicjalizowane
-     */
     virtual int GetSocket() const override;
-
-    /*!
-     * \brief Blokuje dostęp do gniazda (lock mutex)
-     *
-     * Metoda blokuje wątek do momentu uzyskania dostępu.
-     */
     virtual void LockAccess() override;
-
-    /*!
-     * \brief Odblokuje dostęp do gniazda (unlock mutex)
-     */
     virtual void UnlockAccess() override;
-
-    /*!
-     * \brief Zwraca referencję do mutexa
-     *
-     * Umożliwia użycie std::lock_guard lub std::unique_lock.
-     * \return Referencja do wewnętrznego mutexa
-     */
     virtual std::mutex &UseGuard() override;
-    /*!
-     * \brief Bezpiecznie wysyła wiadomość używając mutexa
-     */
     virtual int Send(const char *sMessage) override;
+    
+    // ===== Wysokopoziomowe API komunikacji =====
+    
+    /*!
+     * \brief Otwiera połączenie z serwerem graficznym
+     * 
+     * \param[in] sServerAddress - adres IP serwera (domyślnie "127.0.0.1")
+     * \param[in] port - port serwera (domyślnie 6217)
+     * \return true jeśli połączenie się powiodło
+     */
+    bool OpenConnection(const char* sServerAddress = "127.0.0.1", int port = 6217);
+    
+    /*!
+     * \brief Zamyka połączenie z serwerem
+     * 
+     * Wysyła polecenie Close i zamyka gniazdo.
+     */
+    void CloseConnection();
+    
+    /*!
+     * \brief Sprawdza czy połączenie jest aktywne
+     * 
+     * \return true jeśli gniazdo jest otwarte
+     */
+    bool IsConnected() const;
+    
+    /*!
+     * \brief Wysyła polecenie Clear do serwera
+     * 
+     * \return true jeśli operacja się powiodła
+     */
+    bool SendClear();
+    
+    /*!
+     * \brief Wysyła polecenie AddObj do serwera
+     * 
+     * \param[in] sCmd - kompletne polecenie AddObj
+     * \return true jeśli operacja się powiodła
+     */
+    bool SendAddObj(const std::string& sCmd);
+    
+    /*!
+     * \brief Wysyła polecenie UpdateObj do serwera
+     * 
+     * \param[in] sCmd - kompletne polecenie UpdateObj
+     * \return true jeśli operacja się powiodła
+     */
+    bool SendUpdateObj(const std::string& sCmd);
 };
 
 #endif
