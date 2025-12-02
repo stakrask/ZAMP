@@ -1,5 +1,5 @@
 #include "ComChannel.hh"
-#include <unistd.h>
+
 
 // Konstruktor
 ComChannel::ComChannel() : _socket(-1)
@@ -9,7 +9,8 @@ ComChannel::ComChannel() : _socket(-1)
 // Destruktor
 ComChannel::~ComChannel()
 {
-    if (_socket >= 0) {
+    if (_socket >= 0)
+    {
         close(_socket);
         _socket = -1;
     }
@@ -40,7 +41,37 @@ void ComChannel::UnlockAccess()
 }
 
 // Zwraca referencję do mutexa
-std::mutex& ComChannel::UseGuard()
+std::mutex &ComChannel::UseGuard()
 {
     return _mutex;
+}
+int ComChannel::Send(const char *sMessage)
+{
+    if (_socket < 0)
+    {
+        return -1;
+    }
+
+    // Automatyczna blokada dostępu
+    std::lock_guard<std::mutex> lock(_mutex);
+
+    ssize_t totalSent = 0;
+    ssize_t toSend = (ssize_t)strlen(sMessage);
+    const char *pMessage = sMessage;
+
+    while (toSend > 0)
+    {
+        ssize_t sent = write(_socket, pMessage, toSend);
+
+        if (sent < 0)
+        {
+            return -1;
+        }
+
+        totalSent += sent;
+        toSend -= sent;
+        pMessage += sent;
+    }
+
+    return 0;
 }

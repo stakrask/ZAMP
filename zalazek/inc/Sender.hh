@@ -29,13 +29,6 @@ private:
     std::atomic<bool> _continueLoop;   ///< Flaga kontynuacji wątku
     std::thread _watchThread;          ///< Wątek monitorujący zmiany
     
-    /*!
-     * \brief Funkcja wątku monitorującego zmiany
-     * 
-     * Sprawdza okresowo czy scena uległa zmianie i wysyła UpdateObj
-     */
-    void WatchingLoop();
-    
 public:
     /*!
      * \brief Konstruktor
@@ -107,23 +100,7 @@ public:
      * \return true jeśli operacja się powiodła
      */
     bool SendUpdateObj(const std::string& sCmd);
-    
-    /*!
-     * \brief Uruchamia wątek monitorujący zmiany na scenie
-     * 
-     * Wymaga ustawienia wskaźnika na scenę w konstruktorze.
-     * Wątek automatycznie wysyła UpdateObj gdy wykryje zmianę.
-     * 
-     * \return true jeśli wątek został uruchomiony
-     */
-    bool StartWatchingThread();
-    
-    /*!
-     * \brief Zatrzymuje wątek monitorujący
-     * 
-     * Metoda blokująca - czeka na zakończenie wątku.
-     */
-    void StopWatchingThread();
+
 };
 
 #endif

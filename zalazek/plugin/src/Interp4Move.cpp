@@ -77,7 +77,7 @@ bool Interp4Move::ExecCmd(AbstractScene &rScn,
        << " m/s distance=" << _Distance_m << " m" << endl;
 
   // pblicz liczbę kroków
-  const double STEP_TIME = 0.05;                // 50ms między krokami
+  const double STEP_TIME = 0.05;               // 50ms między krokami
   double total_time = _Distance_m / _Speed_mS; // czas całej trasy [s]
   int num_steps = (int)(total_time / STEP_TIME);
   if (num_steps < 1) // co najmniej jeden krok
@@ -101,8 +101,11 @@ bool Interp4Move::ExecCmd(AbstractScene &rScn,
     cmd << " Trans_m=(" << current_pos[0] << ","
         << current_pos[1] << "," << current_pos[2] << ")\n";
 
-    int socket = rComChann.GetSocket();
-    write(socket, cmd.str().c_str(), cmd.str().length());
+    if (rComChann.Send(cmd.str().c_str()) < 0)
+    {
+      cerr << "!!! Błąd wysyłania polecenia UpdateObj" << endl;
+      return false;
+    }
 
     // czekaj przed następnym krokiem
     usleep((int)(STEP_TIME * 1000000));

@@ -21,7 +21,6 @@ Sender::Sender(AbstractComChannel* pComChannel, AbstractScene* pScene)
 // Destruktor
 Sender::~Sender()
 {
-    StopWatchingThread();
     CloseConnection();
 }
 
@@ -136,56 +135,4 @@ bool Sender::SendAddObj(const std::string& sCmd)
 bool Sender::SendUpdateObj(const std::string& sCmd)
 {
     return Send(sCmd.c_str()) == 0;
-}
-
-// Funkcja wątku monitorującego zmiany
-void Sender::WatchingLoop()
-{
-    if (!_pScene) {
-        cerr << "!!! Błąd: Brak sceny do monitorowania." << endl;
-        return;
-    }
-    
-    cout << "Wątek monitorujący uruchomiony." << endl;
-    
-    while (_continueLoop) {
-        // TODO: Tu powinna być logika sprawdzania zmian na scenie
-        // Np. poprzez AccessControl lub podobny mechanizm
-        
-        // Na razie po prostu czekamy
-        usleep(10000); // 10ms
-    }
-    
-    cout << "Wątek monitorujący zatrzymany." << endl;
-}
-
-// Uruchamia wątek monitorujący
-bool Sender::StartWatchingThread()
-{
-    if (!_pScene) {
-        cerr << "!!! Błąd: Nie można uruchomić wątku bez sceny." << endl;
-        return false;
-    }
-    
-    if (_continueLoop) {
-        cerr << "!!! Ostrzeżenie: Wątek już działa." << endl;
-        return false;
-    }
-    
-    _continueLoop = true;
-    _watchThread = thread(&Sender::WatchingLoop, this);
-    
-    return true;
-}
-
-// Zatrzymuje wątek monitorujący
-void Sender::StopWatchingThread()
-{
-    if (_continueLoop) {
-        _continueLoop = false;
-        
-        if (_watchThread.joinable()) {
-            _watchThread.join();
-        }
-    }
 }

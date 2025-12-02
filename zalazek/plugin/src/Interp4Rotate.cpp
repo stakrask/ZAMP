@@ -154,8 +154,11 @@ bool Interp4Rotate::ExecCmd(AbstractScene &rScn,
     cmd << "\n";
 
     // Wyślij polecenie do serwera
-    int socket = rComChann.GetSocket();
-    write(socket, cmd.str().c_str(), cmd.str().length());
+    if (rComChann.Send(cmd.str().c_str()) < 0)
+    {
+      cerr << "!!! Błąd wysyłania polecenia UpdateObj" << endl;
+      return false;
+    }
 
     // Debug: pokaż co wysyłamy (opcjonalnie)
     if (i % 5 == 0 || i == num_steps - 1)
