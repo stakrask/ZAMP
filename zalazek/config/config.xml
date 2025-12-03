@@ -12,16 +12,16 @@
     
     <Cube Name="Karuzela.Wirnik" Shift="0 0 0" Scale="0.8 0.8 0.8" Trans_m="0 0 4.0" RGB="200 200 200"/>
     
-    <Cube Name="Karuzela.Wirnik.Ramie1" Shift="0 0 0" Scale="0.3 2.5 0.3" Trans_m="0 0 0" RotXYZ_deg="0 0 0" RGB="180 180 180"/>
+    <Cube Name="Karuzela.Wirnik.Ramie1" Shift="0 0 0" Scale="0.3 3.5 0.3" Trans_m="0 0 0" RotXYZ_deg="0 0 0" RGB="180 180 180"/>
     <Cube Name="Karuzela.Wirnik.Ramie1.Gondola" Shift="0 0 0" Scale="1.2 1.2 1.5" Trans_m="0 2.5 0" RGB="220 50 50"/>
     
-    <Cube Name="Karuzela.Wirnik.Ramie2" Shift="0 0 0" Scale="0.3 2.5 0.3" Trans_m="0 0 0" RotXYZ_deg="0 0 90" RGB="180 180 180"/>
+    <Cube Name="Karuzela.Wirnik.Ramie2" Shift="0 0 0" Scale="0.3 3.5 0.3" Trans_m="0 0 0" RotXYZ_deg="0 0 90" RGB="180 180 180"/>
     <Cube Name="Karuzela.Wirnik.Ramie2.Gondola" Shift="0 0 0" Scale="1.2 1.2 1.5" Trans_m="0 2.5 0" RGB="50 220 50"/>
     
-    <Cube Name="Karuzela.Wirnik.Ramie3" Shift="0 0 0" Scale="0.3 2.5 0.3" Trans_m="0 0 0" RotXYZ_deg="0 0 180" RGB="180 180 180"/>
+    <Cube Name="Karuzela.Wirnik.Ramie3" Shift="0 0 0" Scale="0.3 3.5 0.3" Trans_m="0 0 0" RotXYZ_deg="0 0 180" RGB="180 180 180"/>
     <Cube Name="Karuzela.Wirnik.Ramie3.Gondola" Shift="0 0 0" Scale="1.2 1.2 1.5" Trans_m="0 2.5 0" RGB="50 50 220"/>
     
-    <Cube Name="Karuzela.Wirnik.Ramie4" Shift="0 0 0" Scale="0.3 2.5 0.3" Trans_m="0 0 0" RotXYZ_deg="0 0 270" RGB="180 180 180"/>
+    <Cube Name="Karuzela.Wirnik.Ramie4" Shift="0 0 0" Scale="0.3 3.5 0.3" Trans_m="0 0 0" RotXYZ_deg="0 0 270" RGB="180 180 180"/>
     <Cube Name="Karuzela.Wirnik.Ramie4.Gondola" Shift="0 0 0" Scale="1.2 1.2 1.5" Trans_m="0 2.5 0" RGB="220 220 50"/>
   </Objects>
 </Config>

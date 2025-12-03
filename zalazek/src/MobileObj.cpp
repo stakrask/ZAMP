@@ -16,8 +16,8 @@ MobileObj::MobileObj(const CubeParams& params)
 }
 
 std::string MobileObj::GenerateUpdateCmd() const {
-
-    std::lock_guard<std::mutex> lock(_objMutex);
+    // Atomowa operacja odczytu wszystkich parametrów
+    _objMutex.lock();
     
     std::ostringstream oss;
     oss << std::fixed << std::setprecision(3);
@@ -29,6 +29,8 @@ std::string MobileObj::GenerateUpdateCmd() const {
     oss << " Trans_m=(" << _position_m[0] << "," << _position_m[1] << "," << _position_m[2] << ")";
     oss << " RGB=(" << (int)_rgb[0] << "," << (int)_rgb[1] << "," << (int)_rgb[2] << ")";
     oss << "\n";
+    
+    _objMutex.unlock();
     
     return oss.str();
 }

@@ -12,9 +12,6 @@
  * Obiekt przechowuje swoją pozycję, orientację (kąty Roll-Pitch-Yaw),
  * oraz parametry geometryczne (skala, przesunięcie, kolor).
  * 
- * BEZPIECZEŃSTWO WIELOWĄTKOWE:
- * Każdy obiekt ma własny mutex, który chroni jego stan przed race conditions
- * podczas jednoczesnych modyfikacji z wielu wątków.
  */
 class MobileObj : public AbstractMobileObj {
 private:
@@ -43,71 +40,92 @@ public:
     virtual ~MobileObj() {}
     
     virtual double GetAng_Roll_deg() const override {
-        std::lock_guard<std::mutex> lock(_objMutex);
-        return _ang_Roll_deg;
+        _objMutex.lock();
+        double result = _ang_Roll_deg;
+        _objMutex.unlock();
+        return result;
     }
     
     virtual double GetAng_Pitch_deg() const override {
-        std::lock_guard<std::mutex> lock(_objMutex);
-        return _ang_Pitch_deg;
+        _objMutex.lock();
+        double result = _ang_Pitch_deg;
+        _objMutex.unlock();
+        return result;
     }
     
     virtual double GetAng_Yaw_deg() const override {
-        std::lock_guard<std::mutex> lock(_objMutex);
-        return _ang_Yaw_deg;
+        _objMutex.lock();
+        double result = _ang_Yaw_deg;
+        _objMutex.unlock();
+        return result;
     }
     
     virtual void SetAng_Roll_deg(double ang) override {
-        std::lock_guard<std::mutex> lock(_objMutex);
+        _objMutex.lock();
         _ang_Roll_deg = ang;
+        _objMutex.unlock();
     }
     
     virtual void SetAng_Pitch_deg(double ang) override {
-        std::lock_guard<std::mutex> lock(_objMutex);
+        _objMutex.lock();
         _ang_Pitch_deg = ang;
+        _objMutex.unlock();
     }
     
     virtual void SetAng_Yaw_deg(double ang) override {
-        std::lock_guard<std::mutex> lock(_objMutex);
+        _objMutex.lock();
         _ang_Yaw_deg = ang;
+        _objMutex.unlock();
     }
     
     virtual const Vector3D& GetPositoin_m() const override {
-        std::lock_guard<std::mutex> lock(_objMutex);
-        return _position_m;
+        _objMutex.lock();
+        const Vector3D& result = _position_m;
+        _objMutex.unlock();
+        return result;
     }
     
     virtual void SetPosition_m(const Vector3D& pos) override {
-        std::lock_guard<std::mutex> lock(_objMutex);
+        _objMutex.lock();
         _position_m = pos;
+        _objMutex.unlock();
     }
     
     virtual void SetName(const char* name) override {
-        std::lock_guard<std::mutex> lock(_objMutex);
+        _objMutex.lock();
         _name = name;
+        _objMutex.unlock();
     }
     
     virtual const std::string& GetName() const override {
-        std::lock_guard<std::mutex> lock(_objMutex);
-        return _name;
+        _objMutex.lock();
+        const std::string& result = _name;
+        _objMutex.unlock();
+        return result;
     }
     
     /*!
      * \brief Zwraca parametry geometryczne obiektu
      */
     const Vector3D& GetShift() const {
-        std::lock_guard<std::mutex> lock(_objMutex);
-        return _shift;
+        _objMutex.lock();
+        const Vector3D& result = _shift;
+        _objMutex.unlock();
+        return result;
     }
     
     const Vector3D& GetScale() const {
-        std::lock_guard<std::mutex> lock(_objMutex);
-        return _scale;
+        _objMutex.lock();
+        const Vector3D& result = _scale;
+        _objMutex.unlock();
+        return result;
     }
     
     const Vector3D& GetRGB() const {
-        std::lock_guard<std::mutex> lock(_objMutex);
-        return _rgb;
+        _objMutex.lock();
+        const Vector3D& result = _rgb;
+        _objMutex.unlock();
+        return result;
     }
     
     /*!

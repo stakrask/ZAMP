@@ -109,9 +109,7 @@ bool CommandRegistry::ProcessCommands(istream &rStrm,
         // === Rozpoczęcie sekcji równoległej ===
         if (cmdName == "Begin_Parallel_Actions")
         {
-            cout << "\n======================================" << endl;
             cout << "=== BEGIN PARALLEL ACTIONS ===" << endl;
-            cout << "======================================" << endl;
             inParallelSection = true;
             parallelTasks.clear();
             continue;
@@ -144,9 +142,7 @@ bool CommandRegistry::ProcessCommands(istream &rStrm,
                 }
             }
             
-            cout << "======================================" << endl;
             cout << "=== END PARALLEL ACTIONS ===" << endl;
-            cout << "======================================\n" << endl;
             
             inParallelSection = false;
             parallelTasks.clear();

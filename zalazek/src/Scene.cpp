@@ -9,15 +9,18 @@ AbstractMobileObj* Scene::FindMobileObj(const char* sName) {
     if (!sName) return nullptr;
     
     // Lock mutex dla dostępu do mapy
-    lock_guard<mutex> lock(_sceneMutex);
+    _sceneMutex.lock();
     
     auto it = _objects.find(sName);
     
+    AbstractMobileObj* result = nullptr;
     if (it != _objects.end()) {
-        return it->second.get();  // Zwróć surowy wskaźnik
+        result = it->second.get();  // Zwróć surowy wskaźnik
     }
     
-    return nullptr;
+    _sceneMutex.unlock();
+    
+    return result;
 }
 
 // Dodaje obiekt do sceny
@@ -30,7 +33,7 @@ void Scene::AddMobileObj(AbstractMobileObj* pMobObj) {
     string name = pMobObj->GetName();
     
     // Lock mutex dla modyfikacji mapy
-    lock_guard<mutex> lock(_sceneMutex);
+    _sceneMutex.lock();
     
     // Sprawdź czy obiekt o tej nazwie już istnieje
     if (_objects.find(name) != _objects.end()) {
@@ -40,13 +43,15 @@ void Scene::AddMobileObj(AbstractMobileObj* pMobObj) {
     // Dodaj obiekt do mapy (unique_ptr przejmuje własność)
     _objects[name] = unique_ptr<MobileObj>(dynamic_cast<MobileObj*>(pMobObj));
     
+    _sceneMutex.unlock();
+    
     cout << "Dodano obiekt do sceny: " << name << endl;
 }
 
 // Wyświetla listę wszystkich obiektów na scenie
 void Scene::PrintObjects() const {
     // Lock mutex dla iteracji po mapie
-    lock_guard<mutex> lock(_sceneMutex);
+    _sceneMutex.lock();
     
     cout << "\n=== OBIEKTY NA SCENIE ===" << endl;
     cout << "Liczba obiektów: " << _objects.size() << endl;
@@ -60,18 +65,22 @@ void Scene::PrintObjects() const {
              << "° Pitch=" << obj->GetAng_Pitch_deg()
              << "° Yaw=" << obj->GetAng_Yaw_deg() << "°" << endl;
     }
+    
+    _sceneMutex.unlock();
 }
 
 // Generuje polecenia UpdateObj dla wszystkich obiektów
 std::string Scene::GenerateUpdateAllCmd() const {
     // Lock mutex dla iteracji po mapie
-    lock_guard<mutex> lock(_sceneMutex);
+    _sceneMutex.lock();
     
     std::ostringstream oss;
     
     for (const auto& pair : _objects) {
         oss << pair.second->GenerateUpdateCmd();
     }
+    
+    _sceneMutex.unlock();
     
     return oss.str();
 }
